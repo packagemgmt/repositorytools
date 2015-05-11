@@ -27,8 +27,6 @@ class Repository(object):
                 logger.error('Repository password not specified. Please specify repository password in environment'
                              ' variable "REPOSITORY_PASSWORD"')
 
-
-
         if repository_url:
             self._repository_url = repository_url
         else:
