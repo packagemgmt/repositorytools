@@ -1,3 +1,7 @@
+"""
+Contains classes for manipulating with a repository server
+"""
+
 __all__ = ['RepositoryError', 'Repository']
 
 import requests

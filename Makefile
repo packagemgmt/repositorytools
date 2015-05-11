@@ -20,6 +20,7 @@ venv:
 	venv/bin/pip install -r requirements.txt
 
 docs:
+	. venv/bin/activate && sphinx-apidoc -f -o docs repositorytools && deactivate
 	. venv/bin/activate && make -C docs html && deactivate
 
 .PHONY: all tests docs
