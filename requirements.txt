@@ -1,0 +1,7 @@
+requests < 2.0.0 # To support RHEL and its clones
+argparse
+
+# needed by tests
+nose
+mock
+coverage
