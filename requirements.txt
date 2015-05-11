@@ -5,3 +5,4 @@ argparse
 nose
 mock
 coverage
+Sphinx

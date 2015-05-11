@@ -19,4 +19,7 @@ venv:
 	virtualenv --system-site-packages venv
 	venv/bin/pip install -r requirements.txt
 
-.PHONY: all tests
+docs:
+	. venv/bin/activate && make -C docs html && deactivate
+
+.PHONY: all tests docs
