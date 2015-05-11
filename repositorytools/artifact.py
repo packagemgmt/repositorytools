@@ -1,6 +1,5 @@
 __all__ = ['NameVerDetectionError', 'Artifact', 'LocalArtifact', 'LocalRpmArtifact', 'RemoteArtifact']
 
-import rpm
 import urlparse
 import itertools
 import re
@@ -57,6 +56,10 @@ class LocalRpmArtifact(LocalArtifact):
         return ".".join(itertools.ifilter(lambda x: x != "www", reversed(parts)))
 
     def __init__(self, local_path, group=None):
+        try:
+            import rpm
+        except ImportError:
+            raise ArtifactError("Can't import rpm module to detect name and version")
         ts = rpm.ts()
         fdno = os.open(local_path, os.O_RDONLY)
         headers = ts.hdrFromFdno(fdno)
