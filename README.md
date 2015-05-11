@@ -2,7 +2,14 @@ Python API and command-line interface for working with Sonatype Nexus
 =====================================================================
 
 How to run commands locally:
+```
+scripts/{artifact,repo}
+```
+
+and if it fails (for example in Vagrant on windows, due to symlink), you can try:
+```
 PYTHONPATH=$PWD scripts/{artifact,repo}
+```
 
 How to run tests locally:
 
