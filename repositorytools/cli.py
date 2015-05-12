@@ -105,8 +105,12 @@ class ArtifactCLI(CLI):
             logger.exception('Unable to create instance of artifact.')
             sys.exit(1)
 
-        return self.repository.upload_artifacts([artifact], args.repo_id, args.staging, args.description,
-                                                args.upload_filelist)
+        if args.staging:
+            return self.repository.upload_artifacts_to_new_staging([artifact], args.repo_id, True,
+                                                                   description=args.description,
+                                                                   upload_filelist=args.upload_filelist)
+        else:
+            return self.repository.upload_artifacts([artifact], args.repo_id, True)
 
     def delete(self, args):
         self.repository.delete_artifact(args.url)

@@ -23,8 +23,8 @@ class RepositoryTest(TestCase):
         os.unlink(self.artifact_local_path)
 
     def test_upload_artifacts__staging_true(self):
-        artifacts = self.repository.upload_artifacts(local_artifacts=[self.artifact_for_upload], repo=self.repo,
-                                                     staging=True, upload_filelist=True)
+        artifacts = self.repository.upload_artifacts_to_new_staging(local_artifacts=[self.artifact_for_upload],
+                                                                    repo_id=self.repo, upload_filelist=True)
         repo_id = artifacts[0].repo_id
         logging.info('Uploaded to %s', repo_id)
 

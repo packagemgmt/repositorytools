@@ -1,6 +1,7 @@
 """
 Contains classes for manipulating with a repository server
 """
+from abc import abstractmethod
 
 __all__ = ['RepositoryClientError', 'NexusRepositoryClient', 'NexusProRepositoryClient', 'repository_client_factory']
 
@@ -34,7 +35,7 @@ def repository_client_factory(*args, **kwargs):
 class NexusRepositoryClient(object):
     DEFAULT_REPOSITORY_URL = 'https://repository'
 
-    def __init__(self, repository_url=None, user='admin', password=None, staging_repository_url=None, verify_ssl=True):
+    def __init__(self, repository_url=None, user='admin', password=None, verify_ssl=True):
         self._verify_ssl = verify_ssl
         if not password:
             try:
@@ -51,60 +52,26 @@ class NexusRepositoryClient(object):
         self._session = requests.session()
         self._session.auth = (user, password)
 
-        """
-        We redirect users to mirrors, but we don't mirror staging repositories, we when we upload artifacts and populate
-        remote_url, we have to put there different alias of the repository server, which causes that they will not be
-        redirected.
-        """
-        if staging_repository_url:
-            self._staging_repository_url = staging_repository_url
-        else:
-            self._staging_repository_url = os.environ.get('STAGING_REPOSITORY_URL', self._repository_url)
-
-    def upload_artifacts(self, local_artifacts, repo, staging, description='No description', upload_filelist=False,
-                         print_created_artifacts=True):
+    def upload_artifacts(self, local_artifacts, repo_id, print_created_artifacts=True, _hostname_for_download=None,
+                         _path_prefix='content/repositories'):
         """
 
         :param local_artifacts: list[LocalArtifact]
-        :param repo: name of target repository
-        :param staging: bool
-        :param description: description of staging repo
-        :param upload_filelist: for staging repos, creates and uploads a list of uploaded files
+        :param repo_id: id of target repository
         :param print_created_artifacts: if True prints to stdout what was uploaded and where
         :return: list[RemoteArtifact]
         """
-        repo_id = repo
-
-        if staging:
-            repo_id = self.create_staging_repo(repo, description)
-            logger.info('> Created staged repo with ID %s', repo_id)
-            hostname_for_download = self._staging_repository_url
-            path_prefix = 'service/local/staging/deployByRepositoryId'
-        else:
-            hostname_for_download = self._repository_url
-            path_prefix = 'content/repositories'
 
         # upload files
         remote_artifacts = []
 
         for local_artifact in local_artifacts:
-            remote_artifact = self._upload_artifact(local_artifact, path_prefix, repo_id, hostname_for_download)
+            remote_artifact = self._upload_artifact(local_artifact=local_artifact, path_prefix=_path_prefix,
+                                                    repo_id=repo_id, hostname_for_download=_hostname_for_download)
             remote_artifacts.append(remote_artifact)
-
-            # upload filelist
-            if staging and upload_filelist:
-                coord_list = [a.get_coordinates_string() for a in remote_artifacts]
-                data = '\n'.join(coord_list)
-                remote_path = '{path_prefix}/{repo_id}/{repo_id}-filelist'.format(path_prefix=path_prefix,
-                                                                                  repo_id=repo_id)
-                self._send(remote_path, method='POST', data=data, headers={'Content-Type': 'text/csv'})
 
         if print_created_artifacts:
             NexusRepositoryClient._print_created_artifacts(remote_artifacts, repo_id)
-
-        # close staging repo
-        if staging:
-            self.close_staging_repo(repo_id)
 
         return remote_artifacts
 
@@ -179,6 +146,55 @@ class NexusRepositoryClient(object):
 
 
 class NexusProRepositoryClient(NexusRepositoryClient):
+    def __init__(self, repository_url=None, user='admin', password=None, verify_ssl=True, staging_repository_url=None):
+        super(NexusProRepositoryClient, self).__init__(repository_url=repository_url, user=user, password=password,
+                                                       verify_ssl=verify_ssl)
+
+        """
+        We redirect users to mirrors, but we don't mirror staging repositories, we when we upload artifacts and populate
+        remote_url, we have to put there different alias of the repository server, which causes that they will not be
+        redirected.
+        """
+        if staging_repository_url:
+            self._staging_repository_url = staging_repository_url
+        else:
+            self._staging_repository_url = os.environ.get('STAGING_REPOSITORY_URL', self._repository_url)
+
+    def upload_artifacts_to_new_staging(self, local_artifacts, repo_id, print_created_artifacts=True,
+                                        description='No description', upload_filelist=False):
+        """
+
+        :param local_artifacts: list[LocalArtifact]
+        :param repo_id: name of target repository
+        :param print_created_artifacts: if True prints to stdout what was uploaded and where
+        :param staging: bool
+        :param description: description of staging repo
+        :param upload_filelist: for staging repos, creates and uploads a list of uploaded files
+
+        :return: list[RemoteArtifact]
+        """
+        repo_id = self.create_staging_repo(repo_id, description)
+        logger.info('> Created staged repo with ID %s', repo_id)
+        hostname_for_download = self._staging_repository_url
+        path_prefix = 'service/local/staging/deployByRepositoryId'
+
+        # upload files
+        remote_artifacts = self.upload_artifacts(local_artifacts, repo_id, print_created_artifacts,
+                                                 hostname_for_download, path_prefix)
+
+        # upload filelist
+        if upload_filelist:
+            coord_list = [a.get_coordinates_string() for a in remote_artifacts]
+            data = '\n'.join(coord_list)
+            remote_path = '{path_prefix}/{repo_id}/{repo_id}-filelist'.format(path_prefix=path_prefix,
+                                                                              repo_id=repo_id)
+            self._send(remote_path, method='POST', data=data, headers={'Content-Type': 'text/csv'})
+
+        # close staging repo
+        self.close_staging_repo(repo_id)
+
+        return remote_artifacts
+
     def get_artifact_metadata(self, remote_artifact):
         """
         Gets artifact metadata, metadata capability needs to be enabled to use this. Also indexing has to be enabled
