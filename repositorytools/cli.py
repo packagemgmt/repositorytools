@@ -42,7 +42,7 @@ class CLI(object):
         self.parser = self._get_parser()
         self.parser.add_argument("-D", "--debug", action="store_true", dest="debug", default=False,
                                  help="Print lots of debugging information")
-        self.repository = repositorytools.Repository()
+        self.repository = repositorytools.repository_client_factory()
 
     def run(self, args=None):
         args_namespace = self.parser.parse_args(args)

@@ -16,7 +16,7 @@ class RepositoryTest(TestCase):
 
         self.artifact_for_upload = LocalArtifact(group='com.example.repository-tools',
                                                  local_path=self.artifact_local_path)
-        self.repository = repository.Repository()
+        self.repository = repository.NexusProRepositoryClient()
         self.repo = 'test'
 
     def tearDown(self):
