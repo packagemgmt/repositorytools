@@ -5,6 +5,8 @@ import os
 
 from repositorytools import *
 
+logger = logging.getLogger(__name__)
+
 
 class RepositoryTest(TestCase):
     def setUp(self):
@@ -39,9 +41,11 @@ class RepositoryTest(TestCase):
         self.repository.drop_staging_repo(repo_id=repo_id)
 
     def test_set_artifact_metadata(self):
+        logger.debug('local artifact coords: %s', self.artifact_for_upload.get_coordinates_string())
         remote_artifacts = self.repository.upload_artifacts([self.artifact_for_upload], self.repo, False)
         self.assertEqual(len(remote_artifacts), 1)
         remote_artifact = remote_artifacts[0]
+        logger.debug('coords %s', remote_artifact.get_coordinates_string())
 
         my_metadata = {'foo': 'bar'}
         self.repository.set_artifact_metadata(remote_artifact, metadata=my_metadata)

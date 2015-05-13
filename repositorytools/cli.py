@@ -151,9 +151,9 @@ class RepoCLI(CLI):
         # release
         parser_release = subparsers.add_parser('release', help='Releases a staging repo. Cannot be used for'
                                                                ' user-managed repositories')
-        if False:  # to be done
-            parser_release.add_argument("-k", "--keep-metadata", action="store_true", default=False,
-                                        help="Keep custom maven metadata")
+
+        parser_release.add_argument("-k", "--keep-metadata", action="store_true", default=False,
+                                    help="Keep custom maven metadata")
 
         parser_release.add_argument("repo_id", help='id of staging repository, e.g. releases-1000')
         parser_release.add_argument("--description", help='Description of the release', default='No description')
@@ -182,7 +182,7 @@ class RepoCLI(CLI):
         return self.repository.close_staging_repo(args.repo_id)
 
     def release(self, args):
-        self.repository.release_staging_repo(args.repo_id, args.description)
+        return self.repository.release_staging_repo(args.repo_id, args.description, keep_metadata=args.keep_metadata)
 
     def drop(self, args):
         if args.staging:

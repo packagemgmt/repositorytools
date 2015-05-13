@@ -15,22 +15,28 @@ class NameVerDetectionError(ArtifactError):
 
 
 class Artifact(object):
-    def __init__(self, group=None, artifact=None, version=None, classifier=None, extension=None):
+    def __init__(self, group, artifact='', version='', classifier='', extension=''):
         self.group = group
         self.artifact = artifact
         self.version = version
         self.classifier = classifier
         self.extension = extension
 
+    def get_coordinates_string(self):
+        return '{group}:{artifact}:{version}:{classifier}:{extension}'.format(group=self.group, artifact=self.artifact,
+                                                                              version=self.version,
+                                                                              classifier=self.classifier,
+                                                                              extension=self.extension)
+
 
 class LocalArtifact(Artifact):
     """
     Artifact for upload to repository
     """
-    def __init__(self, group, local_path, artifact=None, version=None, classifier=None, extension=None):
+    def __init__(self, group, local_path, artifact='', version='', classifier='', extension=''):
         self.local_path = local_path
 
-        if artifact is None and version is None:
+        if not artifact and not version:
             artifact, version = self.detect_name_and_version()
 
         super(LocalArtifact, self).__init__(group=group, artifact=artifact, version=version, classifier=classifier,
@@ -76,17 +82,11 @@ class RemoteArtifact(Artifact):
     """
     Artifact in repository
     """
-    def __init__(self, group=None, artifact=None, version=None, classifier=None, extension=None, url=None, repo_id=None):
+    def __init__(self, group=None, artifact='', version='', classifier='', extension='', url=None, repo_id=None):
         super(RemoteArtifact, self).__init__(group=group, artifact=artifact, version=version, classifier=classifier,
                                              extension=extension)
         self.url = url
         self.repo_id = repo_id
-
-    def get_coordinates_string(self):
-        return '{group}:{artifact}:{version}:{classifier}:{extension}'.format(group=self.group, artifact=self.artifact,
-                                                                              version=self.version,
-                                                                              classifier=self.classifier,
-                                                                              extension=self.extension)
 
     @classmethod
     def from_repo_id_and_coordinates(cls, repo_id, coordinates):
@@ -101,9 +101,9 @@ class RemoteArtifact(Artifact):
         if len(fields) < 3:
             raise ArtifactError('Incorrect coordinates, at least group, artifact and version are obligatory')
 
-        group, artifact, version = fields[0], fields [1], fields[2]
+        group, artifact, version = fields[0], fields[1], fields[2]
 
-        classifier = extension = None
+        classifier = extension = ''
 
         if len(fields) > 3:
             classifier = fields[3]

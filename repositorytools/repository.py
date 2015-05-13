@@ -11,7 +11,7 @@ import os
 import json
 import base64
 
-from artifact import RemoteArtifact
+from artifact import RemoteArtifact, LocalArtifact
 
 logger = logging.getLogger(__name__)
 
@@ -83,10 +83,11 @@ class NexusRepositoryClient(object):
         with open(local_artifact.local_path, 'rb') as f:
             headers = {'Content-Type': 'application/x-rpm'}
 
-            """rgavf stands for repo-group-local_artifact-version-filename"""
-            rgavf = '{repo_id}/{group}/{name}/{ver}/{filename}'.format(
-                repo_id=repo_id, group=local_artifact.group.replace('.', '/'),
-                name=local_artifact.artifact, ver=local_artifact.version, filename=filename)
+            # rgavf stands for repo-group-local_artifact-version-filename
+            gavf = '{group}/{name}/{ver}/{filename}'.format(group=local_artifact.group.replace('.', '/'),
+                                                            name=local_artifact.artifact, ver=local_artifact.version,
+                                                            filename=filename)
+            rgavf = '{repo_id}/{gavf}'.format(repo_id=repo_id, gavf=gavf)
 
             remote_path = '{path_prefix}/{rgavf}'.format(path_prefix=path_prefix, rgavf=rgavf)
             self._send(remote_path, method='POST', headers=headers, data=f)
@@ -95,9 +96,13 @@ class NexusRepositoryClient(object):
         hostname_for_download = hostname_for_download or self._repository_url
         url = '{hostname}/content/repositories/{rgavf}'.format(hostname=hostname_for_download, rgavf=rgavf)
 
-        return RemoteArtifact(group=local_artifact.group, artifact=local_artifact.artifact,
-                              version=local_artifact.version, classifier=local_artifact.classifier,
-                              extension=local_artifact.extension, url=url, repo_id=repo_id)
+        # get classifier and extension from nexus
+        path = 'service/local/repositories/{repo_id}/content/{gavf}?describe=maven2'.format(repo_id=repo_id, gavf=gavf)
+        maven_metadata = self._send_json(path)['data']
+
+        return RemoteArtifact(group=maven_metadata['groupId'], artifact=maven_metadata['artifactId'],
+                              version=maven_metadata['version'], classifier=maven_metadata.get('classifier', ''),
+                              extension=maven_metadata.get('extension', ''), url=url, repo_id=repo_id)
 
     def delete_artifact(self, url):
         """
@@ -186,14 +191,18 @@ class NexusProRepositoryClient(NexusRepositoryClient):
         if upload_filelist:
             coord_list = [a.get_coordinates_string() for a in remote_artifacts]
             data = '\n'.join(coord_list)
-            remote_path = '{path_prefix}/{repo_id}/{repo_id}-filelist'.format(path_prefix=path_prefix,
-                                                                              repo_id=repo_id)
+            remote_path = '{path_prefix}/{repo_id}/{filelist_path}'.format(path_prefix=path_prefix, repo_id=repo_id,
+                                                                           filelist_path=self._get_filelist_path(repo_id))
             self._send(remote_path, method='POST', data=data, headers={'Content-Type': 'text/csv'})
 
         # close staging repo
         self.close_staging_repo(repo_id)
 
         return remote_artifacts
+
+    @staticmethod
+    def _get_filelist_path(repo_id):
+        return '{repo_id}-filelist'.format(repo_id=repo_id)
 
     def get_artifact_metadata(self, remote_artifact):
         """
@@ -204,6 +213,7 @@ class NexusProRepositoryClient(NexusRepositoryClient):
         :return:
         """
         artifact_id = 'urn:maven/artifact#{coordinates}'.format(coordinates=remote_artifact.get_coordinates_string())
+        logger.debug('artifact_id: %s', artifact_id)
         artifact_id_encoded = base64.b64encode(artifact_id)
         metadata_raw = self._send_json('service/local/index/custom_metadata/{repo_id}/{artifact_id_encoded}'.format(
             repo_id=remote_artifact.repo_id, artifact_id_encoded=artifact_id_encoded))
@@ -235,6 +245,7 @@ class NexusProRepositoryClient(NexusRepositoryClient):
             raise RepositoryClientError('Metadata has to be a dictionary')
 
         artifact_id = 'urn:maven/artifact#{coordinates}'.format(coordinates=remote_artifact.get_coordinates_string())
+        logger.debug('artifact_id: %s', artifact_id)
         artifact_id_encoded = base64.b64encode(artifact_id)
 
         metadata_raw = []
@@ -261,10 +272,35 @@ class NexusProRepositoryClient(NexusRepositoryClient):
         data = {'data': {'stagedRepositoryIds': [repo_id], 'description': description}}
         return self._send_json('service/local/staging/bulk/drop', data, method='POST')
 
-    def release_staging_repo(self, repo_id, description='No description', auto_drop_after_release=True):
+    def release_staging_repo(self, repo_id, description='No description', auto_drop_after_release=True,
+                             keep_metadata=False):
+        artifacts = []
+
+        if keep_metadata:
+            # download list of artifacts
+            resp = self._send('content/repositories/{repo_id}/{filelist_path}'.format(repo_id=repo_id,
+                                                                                      filelist_path=self._get_filelist_path(repo_id)))
+
+            artifacts = [RemoteArtifact.from_repo_id_and_coordinates(repo_id, coordinates=coords)
+                        for coords in resp.text.split('\n')]
+
+            # download metadata for all files
+            for artifact in artifacts:
+                artifact.metadata = self.get_artifact_metadata(artifact)
+
         data = {'data': {'stagedRepositoryIds': [repo_id], 'description': description,
                          'autoDropAfterRelease': auto_drop_after_release}}
-        return self._send_json('service/local/staging/bulk/promote', data, method='POST')
+        result = self._send_json('service/local/staging/bulk/promote', data, method='POST')
+
+        if keep_metadata:
+            # set metadata
+            release_repo_id = self._get_target_repository(repo_id)
+
+            for artifact in artifacts:
+                artifact.repo_id = release_repo_id
+                self.set_artifact_metadata(artifact, artifact.metadata)
+
+        return result
 
     def _get_staging_profile(self, name):
         staging_profiles = self._send_json('service/local/staging/profiles')
@@ -274,3 +310,7 @@ class NexusProRepositoryClient(NexusRepositoryClient):
                 return i
 
         raise RepositoryClientError('No staging profile with name {name}'.format(name=name))
+
+    def _get_target_repository(self, staging_repo_id):
+        data = self._send_json('service/local/staging/repository/{staging_repo_id}'.format(staging_repo_id=staging_repo_id))
+        return data['releaseRepositoryId']

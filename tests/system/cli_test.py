@@ -8,44 +8,39 @@ from repositorytools import cli
 
 REPO = 'test'
 GROUP = 'com.fooware'
+ARTIFACT_LOCAL_PATH = 'test-1.0.txt'
+METADATA = {"foo": "bar"}
 
 
 class ArtifactCliTest(TestCase):
     def setUp(self):
         logging.basicConfig(level=logging.DEBUG)
-        self.artifact_local_path = 'test-1.0.txt'
 
-        with open(self.artifact_local_path, 'w') as f:
+        with open(ARTIFACT_LOCAL_PATH, 'w') as f:
             f.write('foo')
 
         self.artifact_cli = cli.ArtifactCLI()
 
     def tearDown(self):
-        os.unlink(self.artifact_local_path)
+        os.unlink(ARTIFACT_LOCAL_PATH)
 
     def test_upload_and_delete(self):
-        remote_artifacts = self.artifact_cli.run(['upload', self.artifact_local_path, REPO, GROUP])
+        remote_artifacts = self.artifact_cli.run(['upload', ARTIFACT_LOCAL_PATH, REPO, GROUP])
         self.assertEquals(len(remote_artifacts), 1)
         remote_artifact = remote_artifacts[0]
         self.artifact_cli.run(['delete', remote_artifact.url])
 
     def test_metadata(self):
-        """
-        Requires nexus professional
-        :return:
-        """
-        remote_artifacts = cli.ArtifactCLI().run(['upload', self.artifact_local_path, REPO, GROUP])
+        remote_artifacts = cli.ArtifactCLI().run(['upload', ARTIFACT_LOCAL_PATH, REPO, GROUP])
         self.assertEquals(len(remote_artifacts), 1)
         remote_artifact = remote_artifacts[0]
 
-        metadata = {"foo": "bar"}
-
         self.artifact_cli.run(['set-metadata', remote_artifact.repo_id, remote_artifact.get_coordinates_string(),
-                              '{s}'.format(s=json.dumps(metadata))])
+                              '{s}'.format(s=json.dumps(METADATA))])
         metadata_received_serialized = self.artifact_cli.run(['get-metadata', remote_artifact.repo_id,
                                                              remote_artifact.get_coordinates_string()])
         metadata_received = json.loads(metadata_received_serialized)
-        self.assertTrue(set(metadata.items()).issubset(set(metadata_received.items())))
+        self.assertTrue(set(METADATA.items()).issubset(set(metadata_received.items())))
         self.artifact_cli.run(['delete', remote_artifact.url])
 
 
@@ -53,6 +48,15 @@ class RepoCliTest(TestCase):
     def setUp(self):
         logging.basicConfig(level=logging.DEBUG)
         self.repo_cli = cli.RepoCLI()
+        self.artifact_cli = cli.ArtifactCLI()
+
+        with open(ARTIFACT_LOCAL_PATH, 'w') as f:
+            f.write('foo')
+
+        self.artifact_cli = cli.ArtifactCLI()
+
+    def tearDown(self):
+        os.unlink(ARTIFACT_LOCAL_PATH)
 
     def test_create_and_drop(self):
         repo_id = self.repo_cli.run(['create', '-s', '-d', 'testing staging repo', REPO])
@@ -63,3 +67,15 @@ class RepoCliTest(TestCase):
         self.repo_cli.run(['close', repo_id])
         time.sleep(1)
         self.repo_cli.run(['release', repo_id])
+
+    def test_create_and_release_keep_metadata(self):
+        remote_artifacts = self.artifact_cli.run(['upload', '--upload-filelist', '-s', ARTIFACT_LOCAL_PATH,
+                                                  REPO, GROUP])
+        remote_artifact = remote_artifacts[0]
+        # added -D to increase coverage :)
+        self.artifact_cli.run(['-D', 'set-metadata', remote_artifact.repo_id, remote_artifact.get_coordinates_string(),
+                              json.dumps(METADATA)])
+        print self.repo_cli.run(['release', '--keep-metadata', remote_artifact.repo_id])
+        metadata = self.artifact_cli.run(['get-metadata', REPO, remote_artifact.get_coordinates_string()])
+        metadata = json.loads(metadata)
+        self.assertTrue(set(METADATA.items()).issubset(set(metadata.items())))
