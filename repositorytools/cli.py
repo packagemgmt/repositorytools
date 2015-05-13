@@ -26,11 +26,12 @@ def configure_logging(debug):
 
 
 class CLI(object):
-    __metaclass__ = ABCMeta
-
     """
     Base class for cli
     """
+    __metaclass__ = ABCMeta
+
+
     @abstractmethod
     def _get_parser(self):
         """

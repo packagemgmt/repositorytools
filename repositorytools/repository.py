@@ -17,12 +17,16 @@ logger = logging.getLogger(__name__)
 
 
 class RepositoryClientError(Exception):
+    """
+    Base exception raised when working with NexusRepositoryClient and its descendants
+    """
     pass
 
 
 def repository_client_factory(*args, **kwargs):
     """
     Detects which kind of repository user wants to use and returns appropriate instance of it.
+
     :param args:
     :param kwargs:
     :return:
@@ -33,6 +37,9 @@ def repository_client_factory(*args, **kwargs):
 
 
 class NexusRepositoryClient(object):
+    """
+    Class for working with Sonatype Nexus OSS
+    """
     DEFAULT_REPOSITORY_URL = 'https://repository'
 
     def __init__(self, repository_url=None, user='admin', password=None, verify_ssl=True):
@@ -55,6 +62,7 @@ class NexusRepositoryClient(object):
     def upload_artifacts(self, local_artifacts, repo_id, print_created_artifacts=True, _hostname_for_download=None,
                          _path_prefix='content/repositories'):
         """
+        Uploads artifacts to repository.
 
         :param local_artifacts: list[LocalArtifact]
         :param repo_id: id of target repository
@@ -106,6 +114,7 @@ class NexusRepositoryClient(object):
 
     def delete_artifact(self, url):
         """
+        Deletes an artifact from repository.
 
         :param url: string
         :return:
@@ -151,6 +160,9 @@ class NexusRepositoryClient(object):
 
 
 class NexusProRepositoryClient(NexusRepositoryClient):
+    """
+    Class for working with Sonatype Nexus Professional
+    """
     def __init__(self, repository_url=None, user='admin', password=None, verify_ssl=True, staging_repository_url=None):
         super(NexusProRepositoryClient, self).__init__(repository_url=repository_url, user=user, password=password,
                                                        verify_ssl=verify_ssl)
@@ -168,13 +180,14 @@ class NexusProRepositoryClient(NexusRepositoryClient):
     def upload_artifacts_to_new_staging(self, local_artifacts, repo_id, print_created_artifacts=True,
                                         description='No description', upload_filelist=False):
         """
+        Creates a staging repository in staging profile with name repo_id and uploads local_artifacts there.
 
         :param local_artifacts: list[LocalArtifact]
         :param repo_id: name of target repository
         :param print_created_artifacts: if True prints to stdout what was uploaded and where
         :param staging: bool
         :param description: description of staging repo
-        :param upload_filelist: for staging repos, creates and uploads a list of uploaded files
+        :param upload_filelist: if True, creates and uploads a list of uploaded files
 
         :return: list[RemoteArtifact]
         """
@@ -206,8 +219,10 @@ class NexusProRepositoryClient(NexusRepositoryClient):
 
     def get_artifact_metadata(self, remote_artifact):
         """
-        Gets artifact metadata, metadata capability needs to be enabled to use this. Also indexing has to be enabled
-        for that repo to make it work.
+        Gets artifact's maven metadata.
+
+        Metadata capability needs to be enabled to use this. Also indexing has to be enabled for that repo to make it
+        work.
 
         :param remote_artifact:
         :return:
@@ -232,7 +247,9 @@ class NexusProRepositoryClient(NexusRepositoryClient):
 
     def set_artifact_metadata(self, remote_artifact, metadata):
         """
-        Sets artifact metadata
+        Sets artifact metadata.
+
+        The same requirements as for get_artifact_metadata have to be met.
 
         :param remote_artifact:
         :param metadata: dict of keys and values you want to save there
@@ -258,6 +275,12 @@ class NexusProRepositoryClient(NexusRepositoryClient):
                                json_data={"data": metadata_raw})
 
     def create_staging_repo(self, profile_name, description):
+        """
+        Creates a staging repository
+        :param profile_name: name of staging profile
+        :param description: description of created staging repository
+        :return: id of newly created staging repository
+        """
         profile = self._get_staging_profile(profile_name)
         logger.info('> Creating staged repo in profile %s', profile_name)
         r = self._send_json('service/local/staging/profiles/{id}/start'.format(id=profile['id']),
@@ -265,15 +288,40 @@ class NexusProRepositoryClient(NexusRepositoryClient):
         return r['data']['stagedRepositoryId']
 
     def close_staging_repo(self, repo_id, description='No description'):
+        """
+        Closes a staging repository. After close, no files can be added.
+
+        :param repo_id: id of staging repository
+        :param description:
+        :return:
+        """
         data = {'data': {'stagedRepositoryIds': [repo_id], 'description': description}}
         return self._send_json('service/local/staging/bulk/close', data, method='POST')
 
     def drop_staging_repo(self, repo_id, description='No description'):
+        """
+        Deletes a staging repository and all artifacts inside.
+
+        :param repo_id: id of staging repository
+        :param description:
+        :return:
+        """
         data = {'data': {'stagedRepositoryIds': [repo_id], 'description': description}}
         return self._send_json('service/local/staging/bulk/drop', data, method='POST')
 
     def release_staging_repo(self, repo_id, description='No description', auto_drop_after_release=True,
                              keep_metadata=False):
+        """
+        Releases all contents of a staging repository to a release repository which this staging repository targets.
+
+        :param repo_id: id of staging repository
+        :param description:
+        :param auto_drop_after_release: set this to True if you want to delete the staging repository after releasing
+        :param keep_metadata: Keeps custom maven metadata of artifacts after release. Works only there is list of
+         artifacts created by upload_artifacts_to_new_staging with upload_filelist=False. It is because current Nexus 2.x
+         can't do keep the metadata after release, so we manually read the metadata, release and then set them again.
+        :return:
+        """
         if keep_metadata:
             # download list of artifacts
             resp = self._send('content/repositories/{repo_id}/{filelist_path}'.format(repo_id=repo_id,

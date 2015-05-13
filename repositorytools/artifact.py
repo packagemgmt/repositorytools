@@ -15,6 +15,9 @@ class NameVerDetectionError(ArtifactError):
 
 
 class Artifact(object):
+    """
+    Generic class describing an artifact
+    """
     def __init__(self, group, artifact='', version='', classifier='', extension=''):
         self.group = group
         self.artifact = artifact
@@ -53,6 +56,9 @@ class LocalArtifact(Artifact):
 
 
 class LocalRpmArtifact(LocalArtifact):
+    """
+    Special case of local artifact, which can detect it's coordinates from RPM metadata
+    """
     @staticmethod
     def get_artifact_group(url):
         if url is None:
