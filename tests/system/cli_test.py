@@ -72,6 +72,10 @@ class RepoCliTest(TestCase):
         remote_artifacts = self.artifact_cli.run(['upload', '--upload-filelist', '-s', ARTIFACT_LOCAL_PATH,
                                                   REPO, GROUP])
         remote_artifact = remote_artifacts[0]
+
+        # without this sleep, it fails with 404: custom metadata indexing not supported for repository [test-xxxx]
+        time.sleep(1)
+
         # added -D to increase coverage :)
         self.artifact_cli.run(['-D', 'set-metadata', remote_artifact.repo_id, remote_artifact.get_coordinates_string(),
                               json.dumps(METADATA)])
