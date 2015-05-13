@@ -8,7 +8,7 @@ from repositorytools import *
 logger = logging.getLogger(__name__)
 
 
-class RepositoryTest(TestCase):
+class NexusProRepositoryClientTest(TestCase):
     def setUp(self):
         logging.basicConfig(level=logging.DEBUG)
         self.artifact_local_path = 'test-1.0.txt'
@@ -24,7 +24,7 @@ class RepositoryTest(TestCase):
     def tearDown(self):
         os.unlink(self.artifact_local_path)
 
-    def test_upload_artifacts__staging_true(self):
+    def test_upload_artifacts_to_new_staging(self):
         artifacts = self.repository.upload_artifacts_to_new_staging(local_artifacts=[self.artifact_for_upload],
                                                                     repo_id=self.repo, upload_filelist=True)
         repo_id = artifacts[0].repo_id

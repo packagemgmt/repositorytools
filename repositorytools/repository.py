@@ -274,8 +274,6 @@ class NexusProRepositoryClient(NexusRepositoryClient):
 
     def release_staging_repo(self, repo_id, description='No description', auto_drop_after_release=True,
                              keep_metadata=False):
-        artifacts = []
-
         if keep_metadata:
             # download list of artifacts
             resp = self._send('content/repositories/{repo_id}/{filelist_path}'.format(repo_id=repo_id,
@@ -288,14 +286,13 @@ class NexusProRepositoryClient(NexusRepositoryClient):
             for artifact in artifacts:
                 artifact.metadata = self.get_artifact_metadata(artifact)
 
+            release_repo_id = self._get_target_repository(repo_id)
+
         data = {'data': {'stagedRepositoryIds': [repo_id], 'description': description,
                          'autoDropAfterRelease': auto_drop_after_release}}
         result = self._send_json('service/local/staging/bulk/promote', data, method='POST')
 
         if keep_metadata:
-            # set metadata
-            release_repo_id = self._get_target_repository(repo_id)
-
             for artifact in artifacts:
                 artifact.repo_id = release_repo_id
                 self.set_artifact_metadata(artifact, artifact.metadata)
