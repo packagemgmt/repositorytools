@@ -48,8 +48,9 @@ class CLI(object):
     def run(self, args=None):
         args_namespace = self.parser.parse_args(args)
         configure_logging(args_namespace.debug)
-        # we don't use 'str(sys.argv), so we can log actual arguments during tests'
-        logger.info('Started %s, with arguments %s', sys.argv[0], str(args))
+        # in tests we don't use 'str(sys.argv), so we can log actual arguments
+        used_args = args or sys.argv[1:]
+        logger.info('Started %s, with arguments %s', sys.argv[0], str(used_args))
 
         """
         This runs the function that is assigned to the sub-command by calling of set_defaults

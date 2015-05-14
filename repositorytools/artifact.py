@@ -31,6 +31,9 @@ class Artifact(object):
                                                                               classifier=self.classifier,
                                                                               extension=self.extension)
 
+    def __str__(self):
+        return self.get_coordinates_string()
+
 
 class LocalArtifact(Artifact):
     """
