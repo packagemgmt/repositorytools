@@ -287,12 +287,12 @@ class NexusProRepositoryClient(NexusRepositoryClient):
                             {'data': {'description': description}}, method='POST')
         return r['data']['stagedRepositoryId']
 
-    def close_staging_repo(self, repo_id, description='No description'):
+    def close_staging_repo(self, repo_id, description=''):
         """
         Closes a staging repository. After close, no files can be added.
 
         :param repo_id: id of staging repository
-        :param description:
+        :param description: if specified, updates description of staged repository
         :return:
         """
         data = {'data': {'stagedRepositoryIds': [repo_id], 'description': description}}
