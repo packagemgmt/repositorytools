@@ -282,7 +282,7 @@ class NexusProRepositoryClient(NexusRepositoryClient):
         :return: id of newly created staging repository
         """
         profile = self._get_staging_profile(profile_name)
-        logger.info('> Creating staged repo in profile %s', profile_name)
+        logger.info('> Creating staged repo in profile %s, description: %s', profile_name, description)
         r = self._send_json('service/local/staging/profiles/{id}/start'.format(id=profile['id']),
                             {'data': {'description': description}}, method='POST')
         return r['data']['stagedRepositoryId']
