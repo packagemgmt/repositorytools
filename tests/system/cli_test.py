@@ -35,8 +35,8 @@ class ArtifactCliTest(TestCase):
         self.assertEquals(len(remote_artifacts), 1)
         remote_artifact = remote_artifacts[0]
 
-        self.artifact_cli.run(['set-metadata', remote_artifact.repo_id, remote_artifact.get_coordinates_string(),
-                              '{s}'.format(s=json.dumps(METADATA))])
+        self.artifact_cli.run(['set-metadata', '{s}'.format(s=json.dumps(METADATA)), remote_artifact.repo_id,
+                               remote_artifact.get_coordinates_string()])
         metadata_received_serialized = self.artifact_cli.run(['get-metadata', remote_artifact.repo_id,
                                                              remote_artifact.get_coordinates_string()])
         metadata_received = json.loads(metadata_received_serialized)
@@ -77,8 +77,8 @@ class RepoCliTest(TestCase):
         time.sleep(1)
 
         # added -D to increase coverage :)
-        self.artifact_cli.run(['-D', 'set-metadata', remote_artifact.repo_id, remote_artifact.get_coordinates_string(),
-                              json.dumps(METADATA)])
+        self.artifact_cli.run(['-D', 'set-metadata', json.dumps(METADATA), remote_artifact.repo_id,
+                               remote_artifact.get_coordinates_string()])
         print self.repo_cli.run(['release', '--keep-metadata', remote_artifact.repo_id])
         metadata = self.artifact_cli.run(['get-metadata', REPO, remote_artifact.get_coordinates_string()])
         metadata = json.loads(metadata)

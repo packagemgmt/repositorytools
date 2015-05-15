@@ -31,7 +31,6 @@ class CLI(object):
     """
     __metaclass__ = ABCMeta
 
-
     @abstractmethod
     def _get_parser(self):
         """
@@ -64,40 +63,41 @@ class ArtifactCLI(CLI):
         subparsers = parser.add_subparsers()
 
         # upload
-        parser_upload = subparsers.add_parser('upload', help='Uploads an artifact to repository, can detect name and'
+        subparser = subparsers.add_parser('upload', help='Uploads an artifact to repository, can detect name and'
                                                              ' version from filename')
-        parser_upload.add_argument("-s", "--staging", action="store_true", dest="staging", default=False,
+        subparser.add_argument("-s", "--staging", action="store_true", dest="staging", default=False,
                             help="Uploads to a newly created staging repository which targets given repository")
-        parser_upload.add_argument("--upload-filelist", action="store_true", default=False, help="uploads list of uploaded "
+        subparser.add_argument("--upload-filelist", action="store_true", default=False, help="uploads list of uploaded "
                                                                                                  "files")
-        parser_upload.add_argument("--artifact", help="name of artifact, if omitted, will be detected from filename")
-        parser_upload.add_argument("--version", help="version of artifact, if omitted, will be detected from filename")
-        parser_upload.add_argument("-d", "--description", dest="description", default='No description',
+        subparser.add_argument("--artifact", help="name of artifact, if omitted, will be detected from filename")
+        subparser.add_argument("--version", help="version of artifact, if omitted, will be detected from filename")
+        subparser.add_argument("-d", "--description", dest="description", default='No description',
                                    help="Description of a staging repository")
 
-        parser_upload.add_argument("local_file", help="path to an artifact on your machine")
-        parser_upload.add_argument("repo_id", help="id of target repository")
-        parser_upload.add_argument("group", help="artifact group")
-        parser_upload.set_defaults(func=self.upload)
+        subparser.add_argument("local_file", help="path to an artifact on your machine")
+        subparser.add_argument("repo_id", help="id of target repository")
+        subparser.add_argument("group", help="artifact group")
+        subparser.set_defaults(func=self.upload)
 
         # delete
-        parser_delete = subparsers.add_parser('delete', help='Deletes an artifact from repository')
-        parser_delete.add_argument("url", help="URL of the artifact")
-        parser_delete.set_defaults(func=self.delete)
+        subparser = subparsers.add_parser('delete', help='Deletes an artifact from repository')
+        subparser.add_argument("url", help="URL of the artifact")
+        subparser.set_defaults(func=self.delete)
 
         # get metadata
-        parser_get_metadata = subparsers.add_parser('get-metadata', help="Prints artifact's metadata")
-        parser_get_metadata.add_argument("repo_id", help="id of repository containing the artifact")
-        parser_get_metadata.add_argument("coordinates", help="group:artifact:version[:classifier[:extension]]")
-        parser_get_metadata.set_defaults(func=self.get_metadata)
+        subparser = subparsers.add_parser('get-metadata', help="Prints artifact's metadata")
+        subparser.add_argument("repo_id", help="id of repository containing the artifact")
+        subparser.add_argument("coordinates", help="group:artifact:version[:classifier[:extension]]")
+        subparser.set_defaults(func=self.get_metadata)
 
         # set metadata
-        parser_get_metadata = subparsers.add_parser('set-metadata', help="Sets artifact's metadata")
-        parser_get_metadata.add_argument("repo_id", help="id of repository containing the artifact")
-        parser_get_metadata.add_argument("coordinates", help="group:artifact:version[:classifier[:extension]]")
-        parser_get_metadata.add_argument("metadata", help="Dict in JSON format. All keys and values have to be strings,"
+        subparser = subparsers.add_parser('set-metadata', help="Sets artifact's metadata")
+        subparser.add_argument("metadata", help="Dict in JSON format. All keys and values have to be strings,"
                                                           "e.g. '{\"key1\":\"value1\",\"key2\":\"value2\"}'")
-        parser_get_metadata.set_defaults(func=self.set_metadata)
+        subparser.add_argument("repo_id", help="id of repository containing the artifact")
+        subparser.add_argument("coordinates", help="group:artifact:version[:classifier[:extension]]", nargs='+')
+
+        subparser.set_defaults(func=self.set_metadata)
         return parser
 
     def upload(self, args):
@@ -126,9 +126,10 @@ class ArtifactCLI(CLI):
         return output
 
     def set_metadata(self, args):
-        artifact = repositorytools.RemoteArtifact.from_repo_id_and_coordinates(args.repo_id, args.coordinates)
         metadata = json.loads(args.metadata)
-        self.repository.set_artifact_metadata(artifact, metadata)
+        for coordinates_item in args.coordinates:
+            artifact = repositorytools.RemoteArtifact.from_repo_id_and_coordinates(args.repo_id, coordinates_item)
+            self.repository.set_artifact_metadata(artifact, metadata)
 
 
 class RepoCLI(CLI):
@@ -137,37 +138,37 @@ class RepoCLI(CLI):
         subparsers = parser.add_subparsers()
 
         # create
-        parser_create = subparsers.add_parser('create', help='Creates a repository')
-        parser_create.add_argument("-s", "--staging", action="store_true", help='Creates a staging repository with'
-                                                                                ' target to given repo')
-        parser_create.add_argument("-d", "--description", help='description of staged repo', default='no description')
-        parser_create.add_argument("repo_id", help='id of the repository, if used with -s, it is id of'
-                                                   'staging profile, usually same as target repo')
-        parser_create.set_defaults(func=self.create)
+        subparser = subparsers.add_parser('create', help='Creates a repository')
+        subparser.add_argument("-s", "--staging", action="store_true", help='Creates a staging repository with'
+                                                                         ' target to given repo')
+        subparser.add_argument("-d", "--description", help='description of staged repo', default='no description')
+        subparser.add_argument("repo_id", help='id of the repository, if used with -s, it is id of staging profile, '
+                                               'usually same as target repo')
+        subparser.set_defaults(func=self.create)
 
         # close
-        parser_close = subparsers.add_parser('close', help='Closes a staging repository. After closing, no changes can '
+        subparser = subparsers.add_parser('close', help='Closes a staging repository. After closing, no changes can '
                                                            'be made')
-        parser_close.add_argument("repo_id", help='id of the staging repository to be closed')
-        parser_close.set_defaults(func=self.close)
+        subparser.add_argument("repo_id", help='id of the staging repository to be closed')
+        subparser.set_defaults(func=self.close)
 
         # release
-        parser_release = subparsers.add_parser('release', help='Releases a staging repo. Cannot be used for'
-                                                               ' user-managed repositories')
+        subparser = subparsers.add_parser('release', help='Releases a staging repo. Cannot be used for'
+                                                          ' user-managed repositories')
 
-        parser_release.add_argument("-k", "--keep-metadata", action="store_true", default=False,
+        subparser.add_argument("-k", "--keep-metadata", action="store_true", default=False,
                                     help="Keep custom maven metadata")
 
-        parser_release.add_argument("repo_id", help='id of staging repository, e.g. releases-1000')
-        parser_release.add_argument("--description", help='Description of the release', default='No description')
-        parser_release.set_defaults(func=self.release)
+        subparser.add_argument("repo_id", help='id of staging repository, e.g. releases-1000')
+        subparser.add_argument("--description", help='Description of the release', default='No description')
+        subparser.set_defaults(func=self.release)
 
         # drop
-        parser_drop = subparsers.add_parser('drop', help='Drops a repository. Use carefully!')
-        parser_drop.add_argument("-s", "--staging", action="store_true", help='repository is staging')
-        parser_drop.add_argument("--description", help='Description of the drop', default='No description')
-        parser_drop.add_argument("repo_id", help='id of staging repository, e.g. releases-1000')
-        parser_drop.set_defaults(func=self.drop)
+        subparser = subparsers.add_parser('drop', help='Drops a repository. Use carefully!')
+        subparser.add_argument("-s", "--staging", action="store_true", help='repository is staging')
+        subparser.add_argument("--description", help='Description of the drop', default='No description')
+        subparser.add_argument("repo_id", help='id of staging repository, e.g. releases-1000')
+        subparser.set_defaults(func=self.drop)
         return parser
 
     def create(self, args):
