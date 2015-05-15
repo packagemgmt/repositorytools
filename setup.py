@@ -19,8 +19,10 @@ setup(name='repositorytools',
         'Programming Language :: Python',
         'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
-        ),
+        'Topic :: Software Development :: Libraries :: Python Modules',
+        'Environment :: Console',
+      ),
 
-        packages=['repositorytools'],
-        scripts=['scripts/artifact', 'scripts/repo'],
+      packages=['repositorytools'],
+      scripts=['scripts/artifact', 'scripts/repo'],
 )
