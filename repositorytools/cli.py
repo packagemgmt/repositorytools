@@ -149,7 +149,7 @@ class RepoCLI(CLI):
         # close
         subparser = subparsers.add_parser('close', help='Closes a staging repository. After closing, no changes can '
                                                            'be made')
-        subparser.add_argument("repo_id", help='id of the staging repository to be closed')
+        subparser.add_argument("repo_ids", help='id of the staging repository to be closed', nargs='+')
         subparser.set_defaults(func=self.close)
 
         # release
@@ -159,7 +159,7 @@ class RepoCLI(CLI):
         subparser.add_argument("-k", "--keep-metadata", action="store_true", default=False,
                                     help="Keep custom maven metadata")
 
-        subparser.add_argument("repo_id", help='id of staging repository, e.g. releases-1000')
+        subparser.add_argument("repo_ids", help='id of staging repository, e.g. releases-1000',  nargs='+')
         subparser.add_argument("--description", help='Description of the release', default='No description')
         subparser.set_defaults(func=self.release)
 
@@ -167,8 +167,11 @@ class RepoCLI(CLI):
         subparser = subparsers.add_parser('drop', help='Drops a repository. Use carefully!')
         subparser.add_argument("-s", "--staging", action="store_true", help='repository is staging')
         subparser.add_argument("--description", help='Description of the drop', default='No description')
-        subparser.add_argument("repo_id", help='id of staging repository, e.g. releases-1000')
+        subparser.add_argument("repo_ids", help='id of staging repository, e.g. releases-1000',  nargs='+')
         subparser.set_defaults(func=self.drop)
+
+        # batch release
+
         return parser
 
     def create(self, args):
@@ -183,13 +186,14 @@ class RepoCLI(CLI):
             raise Exception('Creation of normal repositories not supported yet')
 
     def close(self, args):
-        return self.repository.close_staging_repo(args.repo_id)
+        return self.repository.close_staging_repos(args.repo_ids)
 
     def release(self, args):
-        return self.repository.release_staging_repo(args.repo_id, args.description, keep_metadata=args.keep_metadata)
+        for repo_id in args.repo_ids:
+            self.repository.release_staging_repo(repo_id, args.description, keep_metadata=args.keep_metadata)
 
     def drop(self, args):
         if args.staging:
-            self.repository.drop_staging_repo(args.repo_id)
+            self.repository.drop_staging_repos(args.repo_ids)
         else:
             raise Exception('Drop of normal repositories not supported yet')

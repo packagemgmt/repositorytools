@@ -295,7 +295,17 @@ class NexusProRepositoryClient(NexusRepositoryClient):
         :param description: if specified, updates description of staged repository
         :return:
         """
-        data = {'data': {'stagedRepositoryIds': [repo_id], 'description': description}}
+        self.close_staging_repos([repo_id], description)
+
+    def close_staging_repos(self, repo_ids, description=''):
+        """
+        Closes multiple staging repositories.
+
+        :param repo_ids: list of repo IDs (strings)
+        For description of other params see close_staging_repo.
+        :return:
+        """
+        data = {'data': {'stagedRepositoryIds': repo_ids, 'description': description}}
         return self._send_json('service/local/staging/bulk/close', data, method='POST')
 
     def drop_staging_repo(self, repo_id, description='No description'):
@@ -303,10 +313,18 @@ class NexusProRepositoryClient(NexusRepositoryClient):
         Deletes a staging repository and all artifacts inside.
 
         :param repo_id: id of staging repository
-        :param description:
         :return:
         """
-        data = {'data': {'stagedRepositoryIds': [repo_id], 'description': description}}
+        self.drop_staging_repos([repo_id], description=description)
+
+    def drop_staging_repos(self, repo_ids, description='No description'):
+        """
+        Deletes multiple staging repositories.
+
+        :param repo_ids: list of repo IDs (strings)
+        :return:
+        """
+        data = {'data': {'stagedRepositoryIds': repo_ids, 'description': description}}
         return self._send_json('service/local/staging/bulk/drop', data, method='POST')
 
     def release_staging_repo(self, repo_id, description='No description', auto_drop_after_release=True,
