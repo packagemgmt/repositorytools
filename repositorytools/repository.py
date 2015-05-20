@@ -3,7 +3,8 @@ Contains classes for manipulating with a repository server
 """
 from abc import abstractmethod
 
-__all__ = ['RepositoryClientError', 'NexusRepositoryClient', 'NexusProRepositoryClient', 'repository_client_factory']
+__all__ = ['RepositoryClientError', 'WrongDataTypeError',
+           'NexusRepositoryClient', 'NexusProRepositoryClient', 'repository_client_factory']
 
 import requests
 import logging
@@ -20,6 +21,9 @@ class RepositoryClientError(Exception):
     """
     Base exception raised when working with NexusRepositoryClient and its descendants
     """
+    pass
+
+class WrongDataTypeError(Exception):
     pass
 
 
@@ -158,6 +162,22 @@ class NexusRepositoryClient(object):
         if r.text:
             return json.loads(r.text)
 
+    @staticmethod
+    def _first_contains_second(first, second):
+        """
+        :param first dict
+        :param second dict
+        :return True if first has all keys from second and that they have same value
+        """
+
+        # to protect a user from hard-to-debug problems with incorrect data type
+        # once I sent here a string with serialized dict and it took me hours to find the bug!
+        if not isinstance(first, dict) or not isinstance(second, dict):
+            raise WrongDataTypeError('Both arguments should be dict')
+
+        result = all(k in first and first[k] == second[k] for k in second)
+        return result
+
 
 class NexusProRepositoryClient(NexusRepositoryClient):
     """
@@ -273,6 +293,23 @@ class NexusProRepositoryClient(NexusRepositoryClient):
         return self._send_json('service/local/index/custom_metadata/{repo_id}/{artifact_id_encoded}'.format(
                                repo_id=remote_artifact.repo_id, artifact_id_encoded=artifact_id_encoded), method='POST',
                                json_data={"data": metadata_raw})
+
+    def list_staging_repos(self, filter_dict=None):
+        """
+
+        :param filter_dict: dictionary with filters, for example {'description':'foo'}
+        :return: list of dictionaries, each dict describes one staging repo
+        """
+        r = self._send_json('service/local/staging/profile_repositories')
+        data = r['data']
+
+        if not filter_dict:
+            result = data
+        else:
+            result = [d for d in data if self._first_contains_second(d, filter_dict)]
+
+        logger.debug('list_staging_repos result: %s', result)
+        return result
 
     def create_staging_repo(self, profile_name, description):
         """

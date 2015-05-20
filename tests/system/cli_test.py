@@ -11,7 +11,6 @@ GROUP = 'com.fooware'
 ARTIFACT_LOCAL_PATH = 'test-1.0.txt'
 METADATA = {"foo": "bar"}
 
-
 class ArtifactCliTest(TestCase):
     def setUp(self):
         logging.basicConfig(level=logging.DEBUG)
@@ -58,8 +57,21 @@ class RepoCliTest(TestCase):
     def tearDown(self):
         os.unlink(ARTIFACT_LOCAL_PATH)
 
-    def test_create_and_drop(self):
-        repo_id = self.repo_cli.run(['create', '-s', '-d', 'testing staging repo', REPO])
+    def test_create_list_and_drop(self):
+        # create repo
+        description = 'testing staging repo'
+        repo_id = self.repo_cli.run(['create', '-s', '-d', description, REPO])
+
+        # find the created repo in staging repos
+        output_json = self.repo_cli.run(['list', '-s', '--output-format', 'json', '--filter',
+                                         json.dumps({'repositoryId': repo_id})])
+        output = json.loads(output_json)
+        self.assertEqual(len(output), 1)
+        output = json.loads(output_json)[0]
+        self.assertEqual(output['repositoryId'], repo_id)
+        self.assertEqual(output['description'], description)
+
+        # drop the repo
         self.repo_cli.run(['drop', '-s', repo_id])
 
     def test_create_and_release(self):

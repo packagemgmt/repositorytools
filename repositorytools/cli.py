@@ -170,8 +170,13 @@ class RepoCLI(CLI):
         subparser.add_argument("repo_ids", help='id of staging repository, e.g. releases-1000',  nargs='+')
         subparser.set_defaults(func=self.drop)
 
-        # batch release
+        # list
+        subparser = subparsers.add_parser('list', help='Lists all reposititories')
+        subparser.add_argument("-s", "--staging", action="store_true", help='List staging repositories instead of normal repositories')
+        subparser.add_argument("--output-format", help='Format of the output list', choices=['json', 'ids'])
+        subparser.add_argument("--filter", help='JSON-serialized dictionary containing filters, for example \'{"description":"foo"}\'')
 
+        subparser.set_defaults(func=self.list)
         return parser
 
     def create(self, args):
@@ -197,3 +202,18 @@ class RepoCLI(CLI):
             self.repository.drop_staging_repos(args.repo_ids)
         else:
             raise Exception('Drop of normal repositories not supported yet')
+
+    def list(self, args):
+        if args.staging:
+            repos = self.repository.list_staging_repos(json.loads(args.filter))
+        else:
+            #repos = self.repository.list_repos(args.filter)
+            raise Exception('Listing normal repositories not supported yet')
+
+        if args.output_format == 'json':
+            output = json.dumps(repos)
+        else:
+            output = '\n'.join(repo['repositoryId'] for repo in repos)
+
+        print(output)
+        return output
