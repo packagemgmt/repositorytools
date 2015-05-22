@@ -11,6 +11,7 @@ GROUP = 'com.fooware'
 ARTIFACT_LOCAL_PATH = 'test-1.0.txt'
 METADATA = {"foo": "bar"}
 
+
 class ArtifactCliTest(TestCase):
     def setUp(self):
         logging.basicConfig(level=logging.DEBUG)
@@ -95,3 +96,6 @@ class RepoCliTest(TestCase):
         metadata = self.artifact_cli.run(['get-metadata', REPO, remote_artifact.get_coordinates_string()])
         metadata = json.loads(metadata)
         self.assertTrue(set(METADATA.items()).issubset(set(metadata.items())))
+
+    def test_list__staging_no_filter(self):
+        self.repo_cli.run(['list', '-s'])

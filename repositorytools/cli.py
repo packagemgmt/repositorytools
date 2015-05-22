@@ -205,7 +205,11 @@ class RepoCLI(CLI):
 
     def list(self, args):
         if args.staging:
-            repos = self.repository.list_staging_repos(json.loads(args.filter))
+            if args.filter:
+                filter_dict = json.loads(args.filter)
+            else:
+                filter_dict = None
+            repos = self.repository.list_staging_repos(filter_dict)
         else:
             #repos = self.repository.list_repos(args.filter)
             raise Exception('Listing normal repositories not supported yet')
