@@ -6,3 +6,4 @@ nose
 mock
 coverage
 Sphinx
+teamcity-messages
