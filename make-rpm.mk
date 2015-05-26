@@ -18,7 +18,7 @@ sysconfdir:=$(DESTDIR)$(shell rpm --eval %{_sysconfdir})
 pythonsitedir:=$(DESTDIR)$(shell python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")
 DISTTAG=$(shell rpm --eval '%{dist}' | tr -d '.')
 SRPMDIR=$(shell rpm --eval '%{_srcrpmdir}')
-TARGETS = 6 7
+OS_VERSIONS = 6 7
 
 # takes the content of current working directory and packs it to tgz
 define do-distcwd
@@ -43,11 +43,27 @@ srpm: distcwd
 	rpmbuild --define "VERSION $(VERSION)" -ts ${WORKDIR}/$(PKGNAME).tgz
 
 # RPMs for all distributions - TBD
-rpmscwd: srpm
-	$(foreach version,$(TARGETS),mock --define "VERSION $(VERSION)" --rebuild -r epel-$(version)-x86_64 $(SRPMDIR)/*.src.rpm;)
+rpms: srpm
+	$(foreach os_version, $(OS_VERSIONS), \
+	    mock \
+	      --define "dist .el$(os_version)" \
+	      --define "VERSION $(VERSION)" \
+	      --rebuild \
+	      -r epel-$(os_version)-x86_64 \
+	      $(SRPMDIR)/*.src.rpm; \
+	)
 
 upload: rpm
 	$(do-upload)
+
+uploadrpms: rpms
+	$(foreach os_version, $(OS_VERSIONS), \
+	    artifact upload \
+	      $(UPLOAD_OPTIONS) \
+	      /var/lib/mock/epel-$(os_version)-x86_64/result/$(PKGNAME)-$(VERSION)-$(RELEASE).$(BUILDARCH).rpm \
+	      packages-el$(os_version) \
+	      $(GROUP); \
+	)
 
 changelog:
 	git log --pretty=format:"%d%n    * %s [%an, %ad]"  --date=short
@@ -55,3 +71,5 @@ changelog:
 installChangelog:
 	mkdir -p $(defaultdocdir)/$(PKGNAME)-$(VERSION)
 	install -m 644 ChangeLog $(defaultdocdir)/$(PKGNAME)-$(VERSION)
+
+.PHONY: distcwd rpm srpm rpms upload uploadrpms changelog installChangelog

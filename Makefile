@@ -26,4 +26,4 @@ docs:
 	. venv/bin/activate && sphinx-apidoc -f -o docs repositorytools && deactivate
 	. venv/bin/activate && make -C docs html && deactivate
 
-.PHONY: all tests docs
+.PHONY: tests docs
