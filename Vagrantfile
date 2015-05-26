@@ -7,7 +7,8 @@ echo "Provisioning"
 cd /vagrant
 
 sudo yum-builddep -y *.spec
-sudo yum -y install git rpm-build
+sudo yum -y install git rpm-build mock rpmdevtools
+sudo usermod -a -G mock vagrant
 make venv
 echo "Provisioning done."
 SCRIPT
