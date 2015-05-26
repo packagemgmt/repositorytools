@@ -1,3 +1,4 @@
+# --- Variables ---
 PKGNAME=$(shell basename *.spec .spec)
 VERSION?=0.0.0# assign zeros only if not specified from cmdline by make {target} VERSION=1.2.3
 GROUP?=com.example# used when uploading to artifact repository
@@ -16,10 +17,14 @@ defaultdocdir=$(DESTDIR)$(shell rpm --eval %{_defaultdocdir})
 initrddir=$(DESTDIR)$(shell rpm --eval %{_initrddir})
 sysconfdir:=$(DESTDIR)$(shell rpm --eval %{_sysconfdir})
 pythonsitedir:=$(DESTDIR)$(shell python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")
-DISTTAG=$(shell rpm --eval '%{dist}' | tr -d '.')
 SRPMDIR=$(shell rpm --eval '%{_srcrpmdir}')
 OS_VERSIONS = 6 7
 
+# --- Deprecated variables ---
+DISTTAG=$(shell rpm --eval '%{dist}' | tr -d '.')
+
+# --- Helper functions ---
+# They are functions so they can be overrided
 # takes the content of current working directory and packs it to tgz
 define do-distcwd
 	# make --no-print-directory -s changelog | grep -v '^$$' > ChangeLog
@@ -27,11 +32,7 @@ define do-distcwd
 	tar cvzf $(WORKDIR)/$(PKGNAME).tgz --transform "s,^\.,$(PKGNAME)-$(VERSION)," .
 endef
 
-# requires repository-tools for uploading to Sonatype Nexus
-define do-upload
-	artifact upload $(UPLOAD_OPTIONS) $(RPMDIR)/$(BUILDARCH)/$(PKGNAME)-$(VERSION)-$(RELEASE).$(BUILDARCH).rpm packages-$(DISTTAG) $(GROUP)
-endef
-
+# --- TARGETS ---
 distcwd:
 	$(do-distcwd)
 
@@ -42,7 +43,7 @@ srpm: distcwd
 	rpmdev-wipetree
 	rpmbuild --define "VERSION $(VERSION)" -ts ${WORKDIR}/$(PKGNAME).tgz
 
-# RPMs for all distributions - TBD
+# Build RPMs for all os versions
 rpms: srpm
 	$(foreach os_version, $(OS_VERSIONS), \
 	    mock \
@@ -53,9 +54,8 @@ rpms: srpm
 	      $(SRPMDIR)/*.src.rpm; \
 	)
 
-upload: rpm
-	$(do-upload)
-
+# Upload RPMs for all os versions to Sonatype Nexus
+# Requires package repository-tools
 uploadrpms: rpms
 	$(foreach os_version, $(OS_VERSIONS), \
 	    artifact upload \
@@ -65,11 +65,23 @@ uploadrpms: rpms
 	      $(GROUP); \
 	)
 
+# Shows VCS changes, can be used to generate changelog
 changelog:
 	git log --pretty=format:"%d%n    * %s [%an, %ad]"  --date=short
 
+# Adds changelog to package
 installChangelog:
 	mkdir -p $(defaultdocdir)/$(PKGNAME)-$(VERSION)
 	install -m 644 ChangeLog $(defaultdocdir)/$(PKGNAME)-$(VERSION)
+
+# ----- deprecated targets ---
+# requires repository-tools for uploading to Sonatype Nexus
+define do-upload
+	artifact upload $(UPLOAD_OPTIONS) $(RPMDIR)/$(BUILDARCH)/$(PKGNAME)-$(VERSION)-$(RELEASE).$(BUILDARCH).rpm packages-$(DISTTAG) $(GROUP)
+endef
+
+upload: rpm
+	$(do-upload)
+
 
 .PHONY: distcwd rpm srpm rpms upload uploadrpms changelog installChangelog
