@@ -19,6 +19,7 @@ sysconfdir:=$(DESTDIR)$(shell rpm --eval %{_sysconfdir})
 pythonsitedir:=$(DESTDIR)$(shell python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")
 SRPMDIR=$(shell rpm --eval '%{_srcrpmdir}')
 OS_VERSIONS = 6 7
+RESULTDIR = .
 
 # --- Deprecated variables ---
 DISTTAG=$(shell rpm --eval '%{dist}' | tr -d '.')
@@ -36,6 +37,7 @@ endef
 distcwd:
 	$(do-distcwd)
 
+# Builds RPM package only for your OS version. Much faster than make rpms, good for basic testing of your spec/makefile
 rpm: distcwd
 	rpmbuild --define "VERSION $(VERSION)" -ta $(WORKDIR)/$(PKGNAME).tgz
 
@@ -43,10 +45,13 @@ srpm: distcwd
 	rpmdev-wipetree
 	rpmbuild --define "VERSION $(VERSION)" -ts ${WORKDIR}/$(PKGNAME).tgz
 
-# Build RPMs for all os versions
+# Build RPMs for all os versions defined on OS_VERIONS
 rpms: srpm
 	$(foreach os_version, $(OS_VERSIONS), \
-	    mock \
+	    mkdir -p $(RESULTDIR)/$(os_version) && \
+	    rm -rf $(RESULTDIR)/$(os_version)/* && \
+	    /usr/bin/mock \
+	      --resultdir $(RESULTDIR)/$(os_version) \
 	      --define "dist .el$(os_version)" \
 	      --define "VERSION $(VERSION)" \
 	      --rebuild \
@@ -60,7 +65,7 @@ uploadrpms: rpms
 	$(foreach os_version, $(OS_VERSIONS), \
 	    artifact upload \
 	      $(UPLOAD_OPTIONS) \
-	      /var/lib/mock/epel-$(os_version)-x86_64/result/$(PKGNAME)-$(VERSION)-$(RELEASE).$(BUILDARCH).rpm \
+	      $(RESULTDIR)/$(os_version)/$(PKGNAME)-$(VERSION)-*.$(BUILDARCH).rpm \
 	      packages-el$(os_version) \
 	      $(GROUP); \
 	)
