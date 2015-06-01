@@ -1,6 +1,12 @@
 Python API and command-line interface for working with Sonatype Nexus
 =====================================================================
 
+How to install
+--------------
+```
+pip install repositorytools
+```
+
 Documentation
 -------------
 is on [rtfd](http://repositorytools.readthedocs.org/en/latest/)
