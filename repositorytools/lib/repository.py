@@ -48,14 +48,16 @@ class NexusRepositoryClient(object):
     """
     DEFAULT_REPOSITORY_URL = 'https://repository'
 
-    def __init__(self, repository_url=None, user='admin', password=None, verify_ssl=True):
+    def __init__(self, repository_url=None, user=None, password=None, verify_ssl=True):
+        """
+
+        :param repository_url: url to repository server
+        :param user: username for connecting to repository
+        :param password: password for connecting to repository
+        :param verify_ssl: False if you don't want to verify SSL certificate of the server
+        :return:
+        """
         self._verify_ssl = verify_ssl
-        if not password:
-            try:
-                password = os.environ['REPOSITORY_PASSWORD']
-            except KeyError:
-                logger.error('Repository password not specified. Please specify repository password in environment'
-                             ' variable "REPOSITORY_PASSWORD"')
 
         if repository_url:
             self._repository_url = repository_url
@@ -63,7 +65,18 @@ class NexusRepositoryClient(object):
             self._repository_url = os.environ.get('REPOSITORY_URL', self.DEFAULT_REPOSITORY_URL)
 
         self._session = requests.session()
-        self._session.auth = (user, password)
+
+        if not user:
+            user = os.environ.get('REPOSITORY_USER')
+
+        if user:
+            if not password:
+                try:
+                    password = os.environ['REPOSITORY_PASSWORD']
+                except KeyError:
+                    logger.error('Repository password not specified. Please specify repository password in environment'
+                                 ' variable "REPOSITORY_PASSWORD"')
+            self._session.auth = (user, password)
 
     def resolve_artifact(self, remote_artifact):
         data = self._send_json('service/local/artifact/maven/resolve', params=dict(g=remote_artifact.group,

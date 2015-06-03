@@ -3,8 +3,8 @@ import logging
 import time
 import os
 
-from repositorytools import *
-
+from repositorytools.lib import *
+import config
 logger = logging.getLogger(__name__)
 
 
@@ -18,8 +18,8 @@ class NexusProRepositoryClientTest(TestCase):
 
         self.artifact_for_upload = LocalArtifact(group='com.example.repository-tools',
                                                  local_path=self.artifact_local_path)
-        self.repository = repository.NexusProRepositoryClient()
-        self.repo = 'test'
+        self.repository = repository.NexusProRepositoryClient(user=config.USER)
+        self.repo = config.REPO
 
     def tearDown(self):
         os.unlink(self.artifact_local_path)
