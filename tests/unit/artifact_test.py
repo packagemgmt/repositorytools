@@ -1,7 +1,7 @@
 from unittest import TestCase
 import logging
 
-from repositorytools.artifact import *
+from repositorytools import LocalArtifact
 
 
 class ArtifactTest(TestCase):

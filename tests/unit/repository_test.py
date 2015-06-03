@@ -1,7 +1,7 @@
 from unittest import TestCase
 import logging
 
-from repositorytools.repository import *
+from repositorytools import NexusRepositoryClient, WrongDataTypeError
 
 
 class NexusRepositoryTest(TestCase):
