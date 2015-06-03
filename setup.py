@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from setuptools import setup
+from setuptools import setup, find_packages
 import re
 
 version = ''
@@ -33,7 +33,7 @@ setup(name='repositorytools',
         'Environment :: Console',
       ),
 
-      packages=['repositorytools'],
+      packages=find_packages(),
       scripts=['scripts/artifact', 'scripts/repo'],
       download_url='https://github.com/stardust85/repositorytools/tarball/3.0.52'
 )
