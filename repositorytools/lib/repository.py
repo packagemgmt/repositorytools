@@ -209,7 +209,7 @@ class NexusProRepositoryClient(NexusRepositoryClient):
     """
     Class for working with Sonatype Nexus Professional
     """
-    def __init__(self, repository_url=None, user='admin', password=None, verify_ssl=True, staging_repository_url=None):
+    def __init__(self, repository_url=None, user=None, password=None, verify_ssl=True, staging_repository_url=None):
         super(NexusProRepositoryClient, self).__init__(repository_url=repository_url, user=user, password=password,
                                                        verify_ssl=verify_ssl)
 

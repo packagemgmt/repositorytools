@@ -44,6 +44,7 @@ class ArtifactCliTest(TestCase):
         self.assertEqual(r.text, CONTENT)
 
         # delete
+        os.environ['REPOSITORY_USER'] = config.USER
         self.artifact_cli.run(['delete', remote_artifact.url])
 
     def test_metadata(self):

@@ -36,7 +36,7 @@ class CLI(object):
         self.parser = self._get_parser()
         self.parser.add_argument("-D", "--debug", action="store_true", dest="debug", default=False,
                                  help="Print lots of debugging information")
-        self.repository = repositorytools.repository_client_factory()
+        self.repository = None
 
     def run(self, args=None):
         args_namespace = self.parser.parse_args(args)
@@ -48,4 +48,5 @@ class CLI(object):
         """
         This runs the function that is assigned to the sub-command by calling of set_defaults
         """
+        self.repository = repositorytools.repository_client_factory()
         return args_namespace.func(args_namespace)
