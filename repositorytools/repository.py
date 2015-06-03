@@ -3,7 +3,7 @@ Contains classes for manipulating with a repository server
 """
 from abc import abstractmethod
 
-__all__ = ['RepositoryClientError', 'WrongDataTypeError',
+__all__ = ['RepositoryClientError', 'WrongDataTypeError', 'ArtifactNotFoundError',
            'NexusRepositoryClient', 'NexusProRepositoryClient', 'repository_client_factory']
 
 import requests
@@ -23,9 +23,11 @@ class RepositoryClientError(Exception):
     """
     pass
 
-class WrongDataTypeError(Exception):
+class WrongDataTypeError(RepositoryClientError):
     pass
 
+class ArtifactNotFoundError(RepositoryClientError):
+    pass
 
 def repository_client_factory(*args, **kwargs):
     """
@@ -62,6 +64,17 @@ class NexusRepositoryClient(object):
 
         self._session = requests.session()
         self._session.auth = (user, password)
+
+    def resolve_artifact(self, remote_artifact):
+        data = self._send_json('service/local/artifact/maven/resolve', params=dict(g=remote_artifact.group,
+                                                               a=remote_artifact.artifact,
+                                                               v=remote_artifact.version,
+                                                               r=remote_artifact.repo_id,
+                                                               c=remote_artifact.classifier,
+                                                               e=remote_artifact.extension))['data']
+
+        remote_artifact.url = '{repository_url}/content/repositories/{repo}/{artifact_path}'.format(
+            repository_url=self._repository_url, repo=remote_artifact.repo_id, artifact_path=data['repositoryPath'])
 
     def upload_artifacts(self, local_artifacts, repo_id, print_created_artifacts=True, _hostname_for_download=None,
                          _path_prefix='content/repositories'):
@@ -128,7 +141,7 @@ class NexusRepositoryClient(object):
 
     @staticmethod
     def _print_created_artifacts(remote_artifacts, repo_id):
-        caption = 'The following files where uploaded to repository {repo_id}'.format(repo_id=repo_id)
+        caption = 'The following files were uploaded to repository {repo_id}'.format(repo_id=repo_id)
 
         if os.environ.get('TEAM_CITY_URL'):
             for remote_artifact in remote_artifacts:
@@ -151,13 +164,13 @@ class NexusRepositoryClient(object):
 
         return r
 
-    def _send_json(self, path, json_data=None, method='GET'):
+    def _send_json(self, path, json_data=None, method='GET', params=None):
         headers = {'Content-Type': 'application/json', 'accept': 'application/json'}
         if json_data is None:
             data = None
         else:
             data = json.dumps(json_data)
-        r = self._send(path, data=data, headers=headers, method=method)
+        r = self._send(path, data=data, headers=headers, method=method, params=params)
 
         if r.text:
             return json.loads(r.text)

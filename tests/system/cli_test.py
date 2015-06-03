@@ -3,6 +3,7 @@ from unittest import TestCase
 import logging
 import os
 import time
+import requests
 
 from repositorytools import cli
 
@@ -10,6 +11,7 @@ REPO = 'test'
 GROUP = 'com.fooware'
 ARTIFACT_LOCAL_PATH = 'test-1.0.txt'
 METADATA = {"foo": "bar"}
+CONTENT = 'foo'
 
 
 class ArtifactCliTest(TestCase):
@@ -17,17 +19,27 @@ class ArtifactCliTest(TestCase):
         logging.basicConfig(level=logging.DEBUG)
 
         with open(ARTIFACT_LOCAL_PATH, 'w') as f:
-            f.write('foo')
+            f.write(CONTENT)
 
         self.artifact_cli = cli.ArtifactCLI()
 
     def tearDown(self):
         os.unlink(ARTIFACT_LOCAL_PATH)
 
-    def test_upload_and_delete(self):
+    def test_upload_resolve_and_delete(self):
+        # upload
         remote_artifacts = self.artifact_cli.run(['upload', ARTIFACT_LOCAL_PATH, REPO, GROUP])
         self.assertEquals(len(remote_artifacts), 1)
         remote_artifact = remote_artifacts[0]
+
+        # resolve
+        urls = self.artifact_cli.run(['resolve', REPO, remote_artifact.get_coordinates_string()]).split('\n')
+        self.assertEqual(1, len(urls))
+        url = urls[0]
+        r = requests.get(url, auth=('admin', os.environ['REPOSITORY_PASSWORD']))
+        r.raise_for_status()
+        self.assertEqual(r.text, CONTENT)
+
         self.artifact_cli.run(['delete', remote_artifact.url])
 
     def test_metadata(self):

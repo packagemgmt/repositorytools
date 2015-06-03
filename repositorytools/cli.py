@@ -96,9 +96,25 @@ class ArtifactCLI(CLI):
                                                           "e.g. '{\"key1\":\"value1\",\"key2\":\"value2\"}'")
         subparser.add_argument("repo_id", help="id of repository containing the artifact")
         subparser.add_argument("coordinates", help="group:artifact:version[:classifier[:extension]]", nargs='+')
-
         subparser.set_defaults(func=self.set_metadata)
+
+        # resolve
+        subparser = subparsers.add_parser('resolve', help="Resolves artifacts' URLs")
+        subparser.add_argument("repo_id", help="id of repository containing the artifact")
+        subparser.add_argument("coordinates", help="group:artifact:version[:classifier[:extension]]", nargs='+')
+        subparser.set_defaults(func=self.resolve)
         return parser
+
+    def resolve(self, args):
+        artifacts = [ repositorytools.RemoteArtifact.from_repo_id_and_coordinates(args.repo_id, coordinates_item)
+                      for coordinates_item in args.coordinates ]
+
+        for artifact in artifacts:
+            self.repository.resolve_artifact(artifact)
+
+        output = '\n'.join(artifact.url for artifact in artifacts)
+        print output
+        return output
 
     def upload(self, args):
         try:

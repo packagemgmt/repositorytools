@@ -5,7 +5,6 @@ import itertools
 import re
 import os
 
-
 class ArtifactError(Exception):
     pass
 
@@ -94,8 +93,8 @@ class RemoteArtifact(Artifact):
     def __init__(self, group=None, artifact='', version='', classifier='', extension='', url=None, repo_id=None):
         super(RemoteArtifact, self).__init__(group=group, artifact=artifact, version=version, classifier=classifier,
                                              extension=extension)
-        self.url = url
         self.repo_id = repo_id
+        self.url = url
 
     @classmethod
     def from_repo_id_and_coordinates(cls, repo_id, coordinates):
