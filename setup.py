@@ -2,6 +2,7 @@
 
 from setuptools import setup, find_packages
 import re
+import sys
 
 version = ''
 with open('repositorytools/__init__.py', 'r') as fd:
@@ -11,6 +12,12 @@ with open('repositorytools/__init__.py', 'r') as fd:
 if not version:
     raise RuntimeError('Cannot find version information')
 
+install_requires=['requests>=1.1']
+
+if sys.version_info < (2,7):
+    install_requires.append("argparse < 2")
+
+
 setup(name='repositorytools',
       version=version,
       description='Tools for working with artifact repositories',
@@ -19,6 +26,7 @@ setup(name='repositorytools',
       url='https://github.com/stardust85/repositorytools',
       license='Apache 2.0',
       platforms='any',
+      install_requires=install_requires,
 
       classifiers=(
         'Development Status :: 4 - Beta',
