@@ -4,6 +4,7 @@ argparse
 # needed by tests
 nose  # going to deprecate it
 pytest
+pytest-cov
 mock
 coverage
 Sphinx
