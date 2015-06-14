@@ -1,17 +1,17 @@
-sudo: false
 language: python
 python: 2.7
+sudo: false
 
 env:
-  - TOX_ENV= py26
+  - TOX_ENV=py26
   - TOX_ENV=py27
   - TOX_ENV=py32
   - TOX_ENV=py33
   - TOX_ENV=py34
   - TOX_ENV=py35
 
+install:
+  - pip install tox
 
-# command to install dependencies
-install: "pip install -r requirements.txt"
-# command to run tests
-script: tox -e $TOX_ENV
+script:
+  - tox -e $TOX_ENV
