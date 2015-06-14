@@ -62,7 +62,7 @@ class ArtifactCLI(CLI):
             self.repository.resolve_artifact(artifact)
 
         output = '\n'.join(artifact.url for artifact in artifacts)
-        print output
+        print(output)
         return output
 
     def upload(self, args):

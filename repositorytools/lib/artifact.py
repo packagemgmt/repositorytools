@@ -1,6 +1,6 @@
 __all__ = ['NameVerDetectionError', 'Artifact', 'LocalArtifact', 'LocalRpmArtifact', 'RemoteArtifact']
 
-import urlparse
+import six.moves.urllib.parse
 import itertools
 import re
 import os
@@ -66,7 +66,7 @@ class LocalRpmArtifact(LocalArtifact):
         if url is None:
             raise Exception('Web pages of the package not present in RPM metadata, please fill the URL tag in specfile')
 
-        parts = urlparse.urlsplit(url).netloc.split(".")
+        parts = six.moves.urllib.parse.urlsplit(url).netloc.split(".")
         return ".".join(itertools.ifilter(lambda x: x != "www", reversed(parts)))
 
     def __init__(self, local_path, group=None):

@@ -12,7 +12,7 @@ with open('repositorytools/__init__.py', 'r') as fd:
 if not version:
     raise RuntimeError('Cannot find version information')
 
-install_requires=['requests>=1.1']
+install_requires=['requests>=1.1', 'six']
 
 if sys.version_info < (2,7):
     install_requires.append("argparse < 2")

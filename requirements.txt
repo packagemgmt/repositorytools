@@ -7,3 +7,4 @@ mock
 coverage
 Sphinx
 teamcity-messages
+six

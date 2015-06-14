@@ -1,5 +1,6 @@
 from unittest import TestCase
 import logging
+import six
 
 from repositorytools import LocalArtifact
 
@@ -16,7 +17,7 @@ class ArtifactTest(TestCase):
             'my_local_path/update-hostname-0.1.4-1.el6.noarch.rpm': ('update-hostname', '0.1.4-1.el6.noarch')
         }
 
-        for local_path, namever in artifacts.iteritems():
+        for local_path, namever in six.iteritems(artifacts):
             expected_name, expected_version = namever
             local_artifact = LocalArtifact('com.fooware', local_path=local_path)
 
