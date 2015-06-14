@@ -9,3 +9,4 @@ coverage
 Sphinx
 teamcity-messages
 six
+tox
