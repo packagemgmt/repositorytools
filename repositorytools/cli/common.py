@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 import logging
-import httplib as http_client
+from six.moves import http_client
 import sys
 
 import repositorytools
