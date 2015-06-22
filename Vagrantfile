@@ -11,7 +11,7 @@ echo "Provisioning"
 cd /vagrant
 
 sudo yum-builddep -y *.spec
-sudo yum -y install git rpm-build mock rpmdevtools
+sudo yum -y install git rpm-build mock rpmdevtools python-tox
 sudo usermod -a -G mock vagrant
 make venv
 echo "Provisioning done."

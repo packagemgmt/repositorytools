@@ -3,10 +3,10 @@ argparse
 
 # needed by tests
 nose  # going to deprecate it
+coverage # going to deprecate it with nose
 pytest
 pytest-cov
 mock
-coverage
 Sphinx
 teamcity-messages
 six
