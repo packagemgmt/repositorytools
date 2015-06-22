@@ -38,5 +38,6 @@ Some library examples
 Documentation
 -------------
 
-is on `rtfd`_
+is on ReadTheDocs_.
+.. _ReadTheDocs: http://repositorytools.readthedocs.org/en/latest/
 
