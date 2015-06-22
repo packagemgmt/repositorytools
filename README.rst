@@ -12,8 +12,9 @@ How to install
 
     pip install repositorytools
 
-Some examples
--------------
+Some command line examples
+--------------------------
+for more commands run repo -h and artifact -h
 ::
 
     export REPOSITORY_URL=http://repo.example.com
@@ -21,9 +22,18 @@ Some examples
     export REPOSITORY_PASSWORD=mysecretpassword
 
     artifact upload foo-1.2.3.ext releases com.fooware
-    # for more commands run repo -h and artifact -h
-
     artifact resolve com.fooware:foo:latest
+
+Some library examples
+---------------------
+::
+
+    import repositorytools
+
+    artifact = repositorytools.RemoteArtifact.from_repo_id_and_coordinates('test', 'com.fooware:foo:1.2.3')
+    client = repositorytools.repository_client_factory()
+    client.resolve_artifact(artifact)
+    print(artifact.url)
 
 Documentation
 -------------
