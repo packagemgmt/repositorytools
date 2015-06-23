@@ -47,5 +47,5 @@ setup(name='repositorytools',
 
       packages=find_packages(),
       scripts=['scripts/artifact', 'scripts/repo'],
-      download_url='https://github.com/stardust85/repositorytools/tarball/3.0.52'
+      download_url='https://github.com/stardust85/repositorytools/tarball/{version}'.format(version=version)
 )
