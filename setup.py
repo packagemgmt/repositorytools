@@ -3,6 +3,7 @@
 from setuptools import setup, find_packages
 import re
 import sys
+import os
 
 version = ''
 with open('repositorytools/__init__.py', 'r') as fd:
@@ -17,10 +18,13 @@ install_requires=['requests>=1.1', 'six']
 if sys.version_info < (2,7):
     install_requires.append("argparse < 2")
 
+with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as readme:
+    README = readme.read()
 
 setup(name='repositorytools',
       version=version,
       description='Tools for working with artifact repositories',
+      long_description=README,
       author='Michel Samia',
       author_email='stardust1985@gmail.com',
       url='https://github.com/stardust85/repositorytools',
