@@ -1,4 +1,4 @@
 __author__ = 'msamia'
-__version__ = '3.0.52'
+__version__ = '4.0.0'
 
 from .lib import *
