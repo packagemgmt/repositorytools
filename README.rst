@@ -2,6 +2,10 @@
     :target: https://travis-ci.org/stardust85/repositorytools
     :alt: CI Build
 
+.. image:: https://img.shields.io/gratipay/stardust85.svg
+    :target: https://gratipay.com/~stardust85/
+    :alt: Fundraising
+
 Python API and command-line interface for working with Sonatype Nexus
 =====================================================================
 
@@ -113,3 +117,9 @@ Documentation
 
 is on http://repositorytools.readthedocs.org/en/latest/
 
+Support
+-------
+You can support my effort many ways:
+ * create issues
+ * fix issues (by sending pull requests)
+ * donating on https://gratipay.com/~stardust85/, you can send even 1 cent per month ;) (but the more the better)
