@@ -9,6 +9,7 @@ BuildArch: noarch
 BuildRequires: python-virtualenv
 Requires: python-argparse
 Requires: python-requests
+Requires: python-six
 
 %description
 %{summary}

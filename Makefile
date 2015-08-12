@@ -5,6 +5,16 @@ mkplugin:
 
 -include make-rpm.mk
 
+testrelease:
+	sed -i "s/'.*'/'$(VERSION)'/" repositorytools/__init__.py
+	git commit -a -m 'bumped version'
+	git push
+	git tag $(VERSION)
+	git push --tags
+	python setup.py sdist upload -r pypitest
+release:
+	python setup.py sdist upload -r pypi
+
 unittests:
 	. venv/bin/activate && nosetests $(NOSEOPTIONS) tests/unit && deactivate
 

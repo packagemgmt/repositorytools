@@ -2,8 +2,12 @@ requests < 2.0.0 # To support RHEL and its clones
 argparse
 
 # needed by tests
-nose
+nose  # going to deprecate it
+coverage # going to deprecate it with nose
+pytest
+pytest-cov
 mock
-coverage
 Sphinx
 teamcity-messages
+six
+tox
