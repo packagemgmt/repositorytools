@@ -2,4 +2,4 @@
 Command line interface
 """
 
-from commands import *
+from .commands import *
