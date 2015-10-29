@@ -14,8 +14,11 @@ class ArtifactCLI(CLI):
         # upload
         subparser = subparsers.add_parser('upload', help='Uploads an artifact to repository, can detect name and'
                                                              ' version from filename')
-        subparser.add_argument("-s", "--staging", action="store_true", dest="staging", default=False,
+        subparser.add_argument("-s", "--staging", action="store_true", default=False,
                             help="Uploads to a newly created staging repository which targets given repository")
+        subparser.add_argument("-x", "--use-existing", action="store_true", default=False,
+                            help="To be used with -s, doesn't create a new repo, but uploads directly to an existing"
+                                 "staging repo")
         subparser.add_argument("--upload-filelist", action="store_true", default=False, help="uploads list of uploaded "
                                                                                                  "files")
         subparser.add_argument("--artifact", help="name of artifact, if omitted, will be detected from filename")
@@ -74,7 +77,12 @@ class ArtifactCLI(CLI):
             sys.exit(1)
 
         if args.staging:
-            return self.repository.upload_artifacts_to_new_staging([artifact], args.repo_id, True,
+            if not args.use_existing:
+                return self.repository.upload_artifacts_to_new_staging([artifact], args.repo_id, True,
+                                                                       description=args.description,
+                                                                       upload_filelist=args.upload_filelist)
+            else:
+                return self.repository.upload_artifacts_to_staging([artifact], args.repo_id, True,
                                                                    description=args.description,
                                                                    upload_filelist=args.upload_filelist)
         else:
