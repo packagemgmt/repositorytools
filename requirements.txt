@@ -1,4 +1,4 @@
-requests < 2.0.0 # To support RHEL and its clones
+requests
 argparse
 
 # needed by tests

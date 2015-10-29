@@ -83,7 +83,6 @@ class ArtifactCLI(CLI):
                                                                        upload_filelist=args.upload_filelist)
             else:
                 return self.repository.upload_artifacts_to_staging([artifact], args.repo_id, True,
-                                                                   description=args.description,
                                                                    upload_filelist=args.upload_filelist)
         else:
             return self.repository.upload_artifacts([artifact], args.repo_id, True)
