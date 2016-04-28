@@ -16,18 +16,20 @@ if not version:
     raise RuntimeError('Cannot find version information')
 
 
+# README.rst file may contains unicode characters, so we use utf8 to read it
+with io.open(os.path.join(HERE, 'README.rst'), mode="r", encoding="utf8") as fd:
+    long_description = fd.read()
+
+
 install_requires=['requests>=1.1', 'six']
 
 if sys.version_info < (2,7):
     install_requires.append("argparse < 2")
 
-with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as readme:
-    README = readme.read()
-
 setup(name='repositorytools',
       version=version,
       description='Tools for working with artifact repositories',
-      long_description=README,
+      long_description=long_description,
       author='Michel Samia',
       author_email='stardust1985@gmail.com',
       url='https://github.com/stardust85/repositorytools',
