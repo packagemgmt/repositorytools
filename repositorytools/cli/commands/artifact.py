@@ -8,7 +8,7 @@ import repositorytools
 from repositorytools.cli.common import CLI
 from repositorytools.lib.repository import logger
 
-__all__ = ['ArtifactCLI', 'artifact']
+__all__ = ['ArtifactCLI', 'artifact_cli']
 
 
 class ArtifactCLI(CLI):

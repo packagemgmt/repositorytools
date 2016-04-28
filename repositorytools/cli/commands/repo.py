@@ -5,7 +5,7 @@ import json
 
 from repositorytools.cli.common import CLI
 
-__all__ = ['RepoCLI', 'repo']
+__all__ = ['RepoCLI', 'repo_cli']
 
 
 class RepoCLI(CLI):
