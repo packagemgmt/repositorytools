@@ -26,7 +26,7 @@ if sys.version_info < (2, 7):
 
 setup(
     name='repositorytools',
-    version=version,
+    version=str(version),
     description='Tools for working with artifact repositories',
     long_description=long_description,
     author='Michel Samia',
