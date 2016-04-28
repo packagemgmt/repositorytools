@@ -1,8 +1,12 @@
-__all__ = ['RepoCLI']
+from __future__ import print_function
 
-from ..common import CLI
 import argparse
 import json
+
+from repositorytools.cli.common import CLI
+
+__all__ = ['RepoCLI', 'repo']
+
 
 class RepoCLI(CLI):
     def _get_parser(self):
@@ -83,7 +87,7 @@ class RepoCLI(CLI):
                 filter_dict = None
             repos = self.repository.list_staging_repos(filter_dict)
         else:
-            #repos = self.repository.list_repos(args.filter)
+            # repos = self.repository.list_repos(args.filter)
             raise Exception('Listing normal repositories not supported yet')
 
         if args.output_format == 'json':
@@ -93,3 +97,10 @@ class RepoCLI(CLI):
 
         print(output)
         return output
+
+
+repo_cli = RepoCLI()
+
+
+if __name__ == '__main__':
+    repo_cli()

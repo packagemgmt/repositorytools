@@ -15,29 +15,28 @@ with io.open(os.path.join(HERE, 'repositorytools', '__init__.py'), 'rb') as fd:
 if not version:
     raise RuntimeError('Cannot find version information')
 
-
 # README.rst file may contains unicode characters, so we use utf8 to read it
 with io.open(os.path.join(HERE, 'README.rst'), mode="r", encoding="utf8") as fd:
     long_description = fd.read()
 
+install_requires = ['requests>=1.1', 'six']
 
-install_requires=['requests>=1.1', 'six']
-
-if sys.version_info < (2,7):
+if sys.version_info < (2, 7):
     install_requires.append("argparse < 2")
 
-setup(name='repositorytools',
-      version=version,
-      description='Tools for working with artifact repositories',
-      long_description=long_description,
-      author='Michel Samia',
-      author_email='stardust1985@gmail.com',
-      url='https://github.com/stardust85/repositorytools',
-      license='Apache 2.0',
-      platforms='any',
-      install_requires=install_requires,
+setup(
+    name='repositorytools',
+    version=version,
+    description='Tools for working with artifact repositories',
+    long_description=long_description,
+    author='Michel Samia',
+    author_email='stardust1985@gmail.com',
+    url='https://github.com/stardust85/repositorytools',
+    license='Apache 2.0',
+    platforms='any',
+    install_requires=install_requires,
 
-      classifiers=[
+    classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         'Intended Audience :: System Administrators',
@@ -50,9 +49,13 @@ setup(name='repositorytools',
         'Programming Language :: Python :: 3.4',
         'Topic :: Software Development :: Libraries :: Python Modules',
         'Environment :: Console',
-      ],
+    ],
 
-      packages=find_packages(),
-      scripts=['scripts/artifact', 'scripts/repo'],
-      download_url='https://github.com/stardust85/repositorytools/tarball/{version}'.format(version=version)
+    packages=find_packages(),
+    download_url='https://github.com/stardust85/repositorytools/tarball/{version}'.format(version=version),
+
+    # --- install scripts in virtualenv
+    entry_points={'console_scripts':
+                      ['artifact = repositorytools.cli.commands.artifact:artifact_cli',
+                       'repo = repositorytools.cli.commands.repo:repo_cli']}
 )
