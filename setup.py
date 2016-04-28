@@ -1,17 +1,20 @@
 #!/usr/bin/env python
-
-from setuptools import setup, find_packages
+import io
+import os
 import re
 import sys
-import os
 
-version = ''
-with open('repositorytools/__init__.py', 'r') as fd:
-    version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]',
-                        fd.read(), re.MULTILINE).group(1)
+from setuptools import setup, find_packages
+
+HERE = os.path.dirname(__file__)
+
+with io.open(os.path.join(HERE, 'repositorytools', '__init__.py'), 'rb') as fd:
+    found = re.search(br'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', fd.read(), re.MULTILINE)
+    version = found and found.group(1)
 
 if not version:
     raise RuntimeError('Cannot find version information')
+
 
 install_requires=['requests>=1.1', 'six']
 
