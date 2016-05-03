@@ -1,7 +1,10 @@
-from abc import ABCMeta, abstractmethod
+import abc
+import collections
 import logging
-from six.moves import http_client
 import sys
+
+# noinspection PyUnresolvedReferences
+from six.moves import http_client
 
 import repositorytools
 
@@ -19,13 +22,13 @@ def configure_logging(debug):
         logging.basicConfig(level=logging.INFO)
 
 
-class CLI(object):
+class CLI(collections.Callable):
     """
     Base class for cli
     """
-    __metaclass__ = ABCMeta
+    __metaclass__ = abc.ABCMeta
 
-    @abstractmethod
+    @abc.abstractmethod
     def _get_parser(self):
         """
         :return: argparse.ArgumentParser
@@ -50,3 +53,6 @@ class CLI(object):
         """
         self.repository = repositorytools.repository_client_factory()
         return args_namespace.func(args_namespace)
+
+    def __call__(self, *args):
+        return self.run(*args)

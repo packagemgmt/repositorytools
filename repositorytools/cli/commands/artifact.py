@@ -1,10 +1,15 @@
-__all__ = ['ArtifactCLI']
+from __future__ import print_function
 
-from ..common import CLI, logger
 import argparse
-import repositorytools
 import json
 import sys
+
+import repositorytools
+from repositorytools.cli.common import CLI
+from repositorytools.lib.repository import logger
+
+__all__ = ['ArtifactCLI', 'artifact_cli']
+
 
 class ArtifactCLI(CLI):
     def _get_parser(self):
@@ -102,3 +107,10 @@ class ArtifactCLI(CLI):
         for coordinates_item in args.coordinates:
             artifact = repositorytools.RemoteArtifact.from_repo_id_and_coordinates(args.repo_id, coordinates_item)
             self.repository.set_artifact_metadata(artifact, metadata)
+
+
+artifact_cli = ArtifactCLI()
+
+
+if __name__ == '__main__':
+    artifact_cli()

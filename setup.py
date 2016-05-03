@@ -1,38 +1,42 @@
 #!/usr/bin/env python
-
-from setuptools import setup, find_packages
+import io
+import os
 import re
 import sys
-import os
 
-version = ''
-with open('repositorytools/__init__.py', 'r') as fd:
-    version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]',
-                        fd.read(), re.MULTILINE).group(1)
+from setuptools import setup, find_packages
+
+HERE = os.path.dirname(__file__)
+
+with io.open(os.path.join(HERE, 'repositorytools', '__init__.py'), 'rb') as fd:
+    found = re.search(br'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', fd.read(), re.MULTILINE)
+    version = found and found.group(1)
 
 if not version:
     raise RuntimeError('Cannot find version information')
 
-install_requires=['requests>=1.1', 'six']
+# README.rst file may contains unicode characters, so we use utf8 to read it
+with io.open(os.path.join(HERE, 'README.rst'), mode="r", encoding="utf8") as fd:
+    long_description = fd.read()
 
-if sys.version_info < (2,7):
+install_requires = ['requests>=1.1', 'six']
+
+if sys.version_info < (2, 7):
     install_requires.append("argparse < 2")
 
-with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as readme:
-    README = readme.read()
+setup(
+    name='repositorytools',
+    version=str(version),
+    description='Tools for working with artifact repositories',
+    long_description=long_description,
+    author='Michel Samia',
+    author_email='stardust1985@gmail.com',
+    url='https://github.com/stardust85/repositorytools',
+    license='Apache 2.0',
+    platforms='any',
+    install_requires=install_requires,
 
-setup(name='repositorytools',
-      version=version,
-      description='Tools for working with artifact repositories',
-      long_description=README,
-      author='Michel Samia',
-      author_email='stardust1985@gmail.com',
-      url='https://github.com/stardust85/repositorytools',
-      license='Apache 2.0',
-      platforms='any',
-      install_requires=install_requires,
-
-      classifiers=[
+    classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         'Intended Audience :: System Administrators',
@@ -45,9 +49,13 @@ setup(name='repositorytools',
         'Programming Language :: Python :: 3.4',
         'Topic :: Software Development :: Libraries :: Python Modules',
         'Environment :: Console',
-      ],
+    ],
 
-      packages=find_packages(),
-      scripts=['scripts/artifact', 'scripts/repo'],
-      download_url='https://github.com/stardust85/repositorytools/tarball/{version}'.format(version=version)
+    packages=find_packages(),
+    download_url='https://github.com/stardust85/repositorytools/tarball/{version}'.format(version=version),
+
+    # --- install scripts in virtualenv
+    entry_points={'console_scripts':
+                      ['artifact = repositorytools.cli.commands.artifact:artifact_cli',
+                       'repo = repositorytools.cli.commands.repo:repo_cli']}
 )
