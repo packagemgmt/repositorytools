@@ -1,4 +1,5 @@
 NOSEOPTIONS = -x -v --exe
+VENV_HOME?=.
 
 mkplugin:
 	curl -k https://raw.githubusercontent.com/stardust85/make-plugins/master/make-rpm.mk > make-rpm.mk
@@ -25,12 +26,13 @@ singletest:
 	. venv/bin/activate && nosetests $(NOSEOPTIONS) $(test) && deactivate
 	# example: make singletest test=tests/system/repository_test.py:RepositoryTest.test_set_artifact_metadata
 
-tests:
-	. venv/bin/activate && nosetests $(NOSEOPTIONS) tests/unit tests/system --with-coverage --cover-package=repositorytools && deactivate
+tests: testenv
+	. $(VENV_HOME)/testenv/bin/activate && nosetests $(NOSEOPTIONS) tests/unit tests/system --with-coverage --cover-package=repositorytools && deactivate
 
-venv:
-	virtualenv --system-site-packages venv
-	venv/bin/pip install -r requirements.txt
+testenv:
+	virtualenv --system-site-packages $(VENV_HOME)/testenv
+	$(VENV_HOME)/testenv/bin/pip install -U pip
+	$(VENV_HOME)/testenv/bin/pip install -r requirements.txt
 
 docs:
 	. venv/bin/activate && sphinx-apidoc -f -o docs repositorytools && deactivate
