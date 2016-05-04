@@ -77,8 +77,8 @@ class ArtifactCLI(CLI):
         try:
             artifact = repositorytools.LocalArtifact(local_path=args.local_file, group=args.group,
                                                      artifact=args.artifact, version=args.version)
-        except repositorytools.NameVerDetectionError:
-            logger.exception('Unable to create instance of artifact.')
+        except repositorytools.NameVerDetectionError as e:
+            logger.exception('Unable to create instance of local artifact: %s', e)
             sys.exit(1)
 
         if args.staging:

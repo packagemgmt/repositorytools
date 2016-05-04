@@ -90,7 +90,7 @@ class NexusRepositoryClient(object):
             repository_url=self._repository_url, repo=remote_artifact.repo_id, artifact_path=data['repositoryPath'])
 
     def upload_artifacts(self, local_artifacts, repo_id, print_created_artifacts=True, _hostname_for_download=None,
-                         _path_prefix='content/repositories'):
+                         _path_prefix='content/repositories', use_rest=True):
         """
         Uploads artifacts to repository.
 
@@ -105,7 +105,8 @@ class NexusRepositoryClient(object):
 
         for local_artifact in local_artifacts:
             remote_artifact = self._upload_artifact(local_artifact=local_artifact, path_prefix=_path_prefix,
-                                                    repo_id=repo_id, hostname_for_download=_hostname_for_download)
+                                                    repo_id=repo_id, hostname_for_download=_hostname_for_download,
+                                                    use_rest=use_rest)
             remote_artifacts.append(remote_artifact)
 
         if print_created_artifacts:
@@ -113,22 +114,39 @@ class NexusRepositoryClient(object):
 
         return remote_artifacts
 
-    def _upload_artifact(self, local_artifact, path_prefix, repo_id, hostname_for_download=None):
+    def _upload_artifact(self, local_artifact, path_prefix, repo_id, hostname_for_download=None, use_rest=True):
 
         filename = os.path.basename(local_artifact.local_path)
         logger.info('-> Uploading %s', filename)
+        logger.debug('local artifact: %s', local_artifact)
+
+        # rgavf stands for repo-group-local_artifact-version-filename
+        gavf = '{group}/{name}/{ver}/{filename}'.format(group=local_artifact.group.replace('.', '/'),
+                                                        name=local_artifact.artifact, ver=local_artifact.version,
+                                                        filename=filename)
+        rgavf = '{repo_id}/{gavf}'.format(repo_id=repo_id, gavf=gavf)
 
         with open(local_artifact.local_path, 'rb') as f:
-            headers = {'Content-Type': 'application/x-rpm'}
+            if use_rest:
+                data = {
+                    'g':local_artifact.group,
+                    'a':local_artifact.artifact,
+                    'v':local_artifact.version,
+                    'r':repo_id,
+                    'e': local_artifact.extension,
+                    'p': local_artifact.extension,
+                    'hasPom': 'false'
+                }
 
-            # rgavf stands for repo-group-local_artifact-version-filename
-            gavf = '{group}/{name}/{ver}/{filename}'.format(group=local_artifact.group.replace('.', '/'),
-                                                            name=local_artifact.artifact, ver=local_artifact.version,
-                                                            filename=filename)
-            rgavf = '{repo_id}/{gavf}'.format(repo_id=repo_id, gavf=gavf)
+                files = {'file': f}
+                headers = {'Content-Type': 'multipart/form-data'}
+                #self._send('service/local/artifact/maven/content', method='POST', headers=headers, data=data, files=files)
+                self._send('service/local/artifact/maven/content', method='POST', data=data, files=files)
+            else:
 
-            remote_path = '{path_prefix}/{rgavf}'.format(path_prefix=path_prefix, rgavf=rgavf)
-            self._send(remote_path, method='POST', headers=headers, data=f)
+                    headers = {'Content-Type': 'application/x-rpm'}
+                    remote_path = '{path_prefix}/{rgavf}'.format(path_prefix=path_prefix, rgavf=rgavf)
+                    self._send(remote_path, method='POST', headers=headers, data=f)
 
         # if not specified, use repository url
         hostname_for_download = hostname_for_download or self._repository_url
@@ -238,7 +256,7 @@ class NexusProRepositoryClient(NexusRepositoryClient):
 
         # upload files
         remote_artifacts = self.upload_artifacts(local_artifacts, repo_id, print_created_artifacts,
-                                                 hostname_for_download, path_prefix)
+                                                 hostname_for_download, path_prefix, use_rest=False)
 
         # upload filelist
         if upload_filelist:

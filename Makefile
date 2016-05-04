@@ -17,13 +17,13 @@ release:
 	python setup.py sdist upload -r pypi
 
 unittests:
-	. venv/bin/activate && nosetests $(NOSEOPTIONS) tests/unit && deactivate
+	. $(VENV_HOME)/testenv/bin/activate && nosetests $(NOSEOPTIONS) tests/unit && deactivate
 
 systemtests:
-	. venv/bin/activate && nosetests $(NOSEOPTIONS) tests/system && deactivate
+	. $(VENV_HOME)/testenv/bin/activate && nosetests $(NOSEOPTIONS) tests/system && deactivate
 
 singletest:
-	. venv/bin/activate && nosetests $(NOSEOPTIONS) $(test) && deactivate
+	. $(VENV_HOME)/testenv/bin/activate && nosetests $(NOSEOPTIONS) $(test) && deactivate
 	# example: make singletest test=tests/system/repository_test.py:RepositoryTest.test_set_artifact_metadata
 
 tests: testenv

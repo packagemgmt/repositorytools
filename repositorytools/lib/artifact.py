@@ -4,6 +4,9 @@ import six.moves.urllib.parse
 import itertools
 import re
 import os
+import logging
+
+logger = logging.getLogger(__name__)
 
 class ArtifactError(Exception):
     pass
@@ -41,20 +44,23 @@ class LocalArtifact(Artifact):
     def __init__(self, group, local_path, artifact='', version='', classifier='', extension=''):
         self.local_path = local_path
 
-        if not artifact and not version:
-            artifact, version = self.detect_name_and_version()
+        if not artifact and not version and not extension:
+            artifact, version, extension = self.detect_name_ver_ext()
+
 
         super(LocalArtifact, self).__init__(group=group, artifact=artifact, version=version, classifier=classifier,
                                             extension=extension)
 
-    def detect_name_and_version(self):
+    def detect_name_ver_ext(self):
         base_name = os.path.basename(self.local_path)
-        result = re.match('^(?# name)(.*?)-(?=\d)(?# version)(\d.*)(?# extension)(\.[^.]+)$', base_name)
+        result = re.match('^(?# name)(.*?)-(?=\d)(?# version)(\d.*)\.(?# extension)([^.]+)$', base_name)
 
         if result is None:
             raise NameVerDetectionError('Automatic detection of name and/or version failed for %s', self.local_path)
 
-        return result.group(1), result.group(2)
+        name, version, extension = result.group(1), result.group(2), result.group(3)
+        logger.debug('name: %s, version: %s, extension: %s', name, version, extension)
+        return name, version, extension
 
 
 class LocalRpmArtifact(LocalArtifact):

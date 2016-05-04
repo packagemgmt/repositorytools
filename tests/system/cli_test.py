@@ -48,7 +48,7 @@ class ArtifactCliTest(TestCase):
         self.artifact_cli.run(['delete', remote_artifact.url])
 
     def test_metadata(self):
-        remote_artifacts = cli.ArtifactCLI().run(['upload', ARTIFACT_LOCAL_PATH, config.REPO, GROUP])
+        remote_artifacts = cli.ArtifactCLI().run(['-D', 'upload', ARTIFACT_LOCAL_PATH, config.REPO, GROUP])
         self.assertEquals(len(remote_artifacts), 1)
         remote_artifact = remote_artifacts[0]
 
