@@ -1,4 +1,4 @@
-NOSEOPTIONS = -x -v --exe
+NOSEOPTIONS = -x -v --exe --nologcapture
 VENV_HOME?=.
 
 mkplugin:
@@ -32,6 +32,7 @@ tests: testenv
 testenv:
 	virtualenv --system-site-packages $(VENV_HOME)/testenv
 	$(VENV_HOME)/testenv/bin/pip install -U pip
+	$(VENV_HOME)/testenv/bin/pip install --ignore-installed -e .
 	$(VENV_HOME)/testenv/bin/pip install -r requirements.txt
 
 docs:

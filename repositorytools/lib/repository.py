@@ -12,7 +12,7 @@ import json
 import base64
 
 from repositorytools.lib.artifact import RemoteArtifact
-
+from requests_toolbelt import MultipartEncoder
 
 logger = logging.getLogger(__name__)
 
@@ -139,9 +139,20 @@ class NexusRepositoryClient(object):
                 }
 
                 files = {'file': f}
-                headers = {'Content-Type': 'multipart/form-data'}
-                #self._send('service/local/artifact/maven/content', method='POST', headers=headers, data=data, files=files)
-                self._send('service/local/artifact/maven/content', method='POST', data=data, files=files)
+
+                streamed = True
+                if streamed:
+                    data_list = data.items()
+                    data_list.append( ('file', (filename, f, 'text/plain') ))
+                    data['file'] = (filename, f, 'text/plain')
+                    m = MultipartEncoder(fields=data_list)
+                    headers = {'Content-Type': m.content_type}
+                    logger.debug('payload: %s', m.to_string())
+                    import pdb
+                    #pdb.set_trace()
+                    self._send('service/local/artifact/maven/content', method='POST', data=m, headers=headers)
+                else:
+                    self._send('service/local/artifact/maven/content', method='POST', data=data, files=files)
             else:
 
                     headers = {'Content-Type': 'application/x-rpm'}

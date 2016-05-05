@@ -19,7 +19,7 @@ if not version:
 with io.open(os.path.join(HERE, 'README.rst'), mode="r", encoding="utf8") as fd:
     long_description = fd.read()
 
-install_requires = ['requests>=1.1', 'six']
+install_requires = ['requests>=2.1', 'six', 'requests-toolbelt']
 
 if sys.version_info < (2, 7):
     install_requires.append("argparse < 2")

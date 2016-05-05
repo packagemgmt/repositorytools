@@ -1,6 +1,3 @@
-requests
-argparse
-
 # needed by tests
 nose  # going to deprecate it
 coverage # going to deprecate it with nose

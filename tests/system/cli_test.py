@@ -7,6 +7,13 @@ import requests
 
 from repositorytools import cli
 
+try:
+    import resource
+except:
+    resource = None
+
+MAX_MEMORY_USE_MB = 1
+
 import config
 GROUP = 'com.fooware'
 ARTIFACT_LOCAL_PATH = 'test-1.0.txt'
@@ -23,6 +30,11 @@ class ArtifactCliTest(TestCase):
 
         self.artifact_cli = cli.ArtifactCLI()
         os.environ['REPOSITORY_USER'] = config.USER
+
+        if False:
+            #soft = hard = MAX_MEMORY_USE_MB * 1000
+            soft = hard = MAX_MEMORY_USE_MB * 1
+            resource.setrlimit(resource.RLIMIT_DATA, (soft, hard))
 
     def tearDown(self):
         os.unlink(ARTIFACT_LOCAL_PATH)
@@ -48,7 +60,7 @@ class ArtifactCliTest(TestCase):
         self.artifact_cli.run(['delete', remote_artifact.url])
 
     def test_metadata(self):
-        remote_artifacts = cli.ArtifactCLI().run(['-D', 'upload', ARTIFACT_LOCAL_PATH, config.REPO, GROUP])
+        remote_artifacts = cli.ArtifactCLI().run(['upload', ARTIFACT_LOCAL_PATH, config.REPO, GROUP])
         self.assertEquals(len(remote_artifacts), 1)
         remote_artifact = remote_artifacts[0]
 
