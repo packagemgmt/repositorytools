@@ -138,26 +138,22 @@ class NexusRepositoryClient(object):
                     'hasPom': 'false'
                 }
 
-                files = {'file': f}
 
-                streamed = True
-                if streamed:
-                    data_list = data.items()
-                    data_list.append( ('file', (filename, f, 'text/plain') ))
-                    data['file'] = (filename, f, 'text/plain')
-                    m = MultipartEncoder(fields=data_list)
-                    headers = {'Content-Type': m.content_type}
-                    logger.debug('payload: %s', m.to_string())
-                    import pdb
-                    #pdb.set_trace()
-                    self._send('service/local/artifact/maven/content', method='POST', data=m, headers=headers)
-                else:
-                    self._send('service/local/artifact/maven/content', method='POST', data=data, files=files)
+                data_list = data.items()
+                data_list.append( ('file', (filename, f, 'text/plain') ))
+                m_for_logging = MultipartEncoder(fields=data_list)
+                logger.debug('payload: %s', m_for_logging.to_string())
+
+                f.seek(0)
+                m = MultipartEncoder(fields=data_list)
+                headers = {'Content-Type': m.content_type}
+
+                self._send('service/local/artifact/maven/content', method='POST', data=m, headers=headers)
+
             else:
-
-                    headers = {'Content-Type': 'application/x-rpm'}
-                    remote_path = '{path_prefix}/{rgavf}'.format(path_prefix=path_prefix, rgavf=rgavf)
-                    self._send(remote_path, method='POST', headers=headers, data=f)
+                headers = {'Content-Type': 'application/x-rpm'}
+                remote_path = '{path_prefix}/{rgavf}'.format(path_prefix=path_prefix, rgavf=rgavf)
+                self._send(remote_path, method='POST', headers=headers, data=f)
 
         # if not specified, use repository url
         hostname_for_download = hostname_for_download or self._repository_url
