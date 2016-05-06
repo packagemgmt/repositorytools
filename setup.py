@@ -49,13 +49,9 @@ setup(
         'Programming Language :: Python :: 3.4',
         'Topic :: Software Development :: Libraries :: Python Modules',
         'Environment :: Console',
-    ],
+      ],
 
-    packages=find_packages(),
-    download_url='https://github.com/stardust85/repositorytools/tarball/{version}'.format(version=version),
-
-    # --- install scripts in virtualenv
-    entry_points={'console_scripts':
-                      ['artifact = repositorytools.cli.commands.artifact:artifact_cli',
-                       'repo = repositorytools.cli.commands.repo:repo_cli']}
+      packages=find_packages(),
+      scripts=['scripts/artifact', 'scripts/repo'],
+      download_url='https://github.com/stardust85/repositorytools/tarball/{version}'.format(version=version)
 )
