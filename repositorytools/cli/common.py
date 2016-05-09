@@ -55,4 +55,5 @@ class CLI(collections.Callable):
         return args_namespace.func(args_namespace)
 
     def __call__(self, *args):
-        return self.run(*args)
+        self.run(*args)
+        return 0  # exit code
