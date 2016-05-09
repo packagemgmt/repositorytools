@@ -403,7 +403,8 @@ class NexusProRepositoryClient(NexusRepositoryClient):
         Closes multiple staging repositories.
 
         :param repo_ids: list of repo IDs (strings)
-        For description of other params see close_staging_repo.
+            For description of other params see close_staging_repo.
+        :param description: Description message.
         :return:
         """
         data = {'data': {'stagedRepositoryIds': repo_ids, 'description': description}}

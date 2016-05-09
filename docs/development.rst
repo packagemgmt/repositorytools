@@ -1,19 +1,23 @@
 How to run commands locally
 ---------------------------
 
-::
-
-    scripts/{artifact,repo}
-
-and if it fails (for example in Vagrant on windows, due to symlink), you
-can try:
+Activate the virtualenv and run the script
 
 ::
 
-    PYTHONPATH=$PWD scripts/{artifact,repo}
+    {artifact,repo}
+
 
 How to run tests locally
 ------------------------
+
+Activate the virtualenv, go into the project directory and run:
+
+::
+
+    nosetests -v
+
+Alternatively:
 
 1. Install pycharm >=3.4.1
 2. Install virtualbox and vagrant
