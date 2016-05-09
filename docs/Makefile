@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # Makefile for Sphinx documentation
 #
 
