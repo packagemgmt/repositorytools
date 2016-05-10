@@ -1,8 +1,11 @@
+from __future__ import print_function
+
 import json
-from unittest import TestCase
 import logging
 import os
 import time
+from unittest import TestCase
+
 import requests
 
 from repositorytools import cli
@@ -121,7 +124,7 @@ class RepoCliTest(TestCase):
         # added -D to increase coverage :)
         self.artifact_cli.run(['-D', 'set-metadata', json.dumps(METADATA), remote_artifact.repo_id,
                                remote_artifact.get_coordinates_string()])
-        print self.repo_cli.run(['release', '--keep-metadata', remote_artifact.repo_id])
+        print(self.repo_cli.run(['release', '--keep-metadata', remote_artifact.repo_id]))
         metadata = self.artifact_cli.run(['get-metadata', config.REPO, remote_artifact.get_coordinates_string()])
         metadata = json.loads(metadata)
         self.assertTrue(set(METADATA.items()).issubset(set(metadata.items())))

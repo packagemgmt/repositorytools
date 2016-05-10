@@ -100,7 +100,7 @@ Works even without authentication.
     print(artifact.url)
 
 Deleting artifacts
-~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~
 
 ::
 
