@@ -44,9 +44,16 @@ class LocalArtifact(Artifact):
     def __init__(self, group, local_path, artifact='', version='', classifier='', extension=''):
         self.local_path = local_path
 
-        if not artifact and not version and not extension:
-            artifact, version, extension = self.detect_name_ver_ext()
+        artifact_detected, version_detected, extension_detected = self.detect_name_ver_ext()
 
+        if not artifact:
+            artifact = artifact_detected
+
+        if not version:
+            version = version_detected
+
+        if not extension:
+            extension = extension_detected
 
         super(LocalArtifact, self).__init__(group=group, artifact=artifact, version=version, classifier=classifier,
                                             extension=extension)

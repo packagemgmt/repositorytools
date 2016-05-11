@@ -62,12 +62,21 @@ class ArtifactCliTest(TestCase):
         os.environ['REPOSITORY_USER'] = config.USER
         self.artifact_cli.run(['delete', remote_artifact.url])
 
+    def test_upload_explicit_version(self):
+        # upload
+        remote_artifacts = self.artifact_cli.run(['upload', '--version', '2.0.0', ARTIFACT_LOCAL_PATH, config.REPO, GROUP])
+        self.assertEquals(len(remote_artifacts), 1)
+        remote_artifact = remote_artifacts[0]
+
+        # delete
+        self.artifact_cli.run(['delete', remote_artifact.url])
+
     def test_metadata(self):
         remote_artifacts = cli.ArtifactCLI().run(['upload', ARTIFACT_LOCAL_PATH, config.REPO, GROUP])
         self.assertEquals(len(remote_artifacts), 1)
         remote_artifact = remote_artifacts[0]
 
-        self.artifact_cli.run(['set-metadata', '{s}'.format(s=json.dumps(METADATA)), remote_artifact.repo_id,
+        self.artifact_cli.run(['-D', 'set-metadata', '{s}'.format(s=json.dumps(METADATA)), remote_artifact.repo_id,
                                remote_artifact.get_coordinates_string()])
         metadata_received_serialized = self.artifact_cli.run(['get-metadata', remote_artifact.repo_id,
                                                              remote_artifact.get_coordinates_string()])

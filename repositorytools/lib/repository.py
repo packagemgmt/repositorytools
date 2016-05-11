@@ -150,22 +150,28 @@ class NexusRepositoryClient(object):
 
                 self._send('service/local/artifact/maven/content', method='POST', data=m, headers=headers)
 
+                result = RemoteArtifact(group=local_artifact.group, artifact=local_artifact.artifact,
+                                      version=local_artifact.version, classifier=local_artifact.classifier,
+                                      extension=local_artifact.extension, repo_id=repo_id)
+                self.resolve_artifact(result)
+                return result
+
             else:
                 headers = {'Content-Type': 'application/x-rpm'}
                 remote_path = '{path_prefix}/{rgavf}'.format(path_prefix=path_prefix, rgavf=rgavf)
                 self._send(remote_path, method='POST', headers=headers, data=f)
 
-        # if not specified, use repository url
-        hostname_for_download = hostname_for_download or self._repository_url
-        url = '{hostname}/content/repositories/{rgavf}'.format(hostname=hostname_for_download, rgavf=rgavf)
+                # if not specified, use repository url
+                hostname_for_download = hostname_for_download or self._repository_url
+                url = '{hostname}/content/repositories/{rgavf}'.format(hostname=hostname_for_download, rgavf=rgavf)
 
-        # get classifier and extension from nexus
-        path = 'service/local/repositories/{repo_id}/content/{gavf}?describe=maven2'.format(repo_id=repo_id, gavf=gavf)
-        maven_metadata = self._send_json(path)['data']
+                # get classifier and extension from nexus
+                path = 'service/local/repositories/{repo_id}/content/{gavf}?describe=maven2'.format(repo_id=repo_id, gavf=gavf)
+                maven_metadata = self._send_json(path)['data']
 
-        return RemoteArtifact(group=maven_metadata['groupId'], artifact=maven_metadata['artifactId'],
-                              version=maven_metadata['version'], classifier=maven_metadata.get('classifier', ''),
-                              extension=maven_metadata.get('extension', ''), url=url, repo_id=repo_id)
+                return RemoteArtifact(group=maven_metadata['groupId'], artifact=maven_metadata['artifactId'],
+                                      version=maven_metadata['version'], classifier=maven_metadata.get('classifier', ''),
+                                      extension=maven_metadata.get('extension', ''), url=url, repo_id=repo_id)
 
     def delete_artifact(self, url):
         """
