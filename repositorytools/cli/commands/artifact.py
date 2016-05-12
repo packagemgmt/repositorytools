@@ -30,6 +30,7 @@ class ArtifactCLI(CLI):
         subparser.add_argument("--version", help="version of artifact, if omitted, will be detected from filename")
         subparser.add_argument("-d", "--description", dest="description", default='No description',
                                    help="Description of a staging repository")
+        subparser.add_argument("--use-direct-put", action="store_true", help="don't use REST API, but directly put the file to it's probable path. Doesn't generate maven metadata. Good for uploading to snapshot repositories.")
 
         subparser.add_argument("local_file", help="path to an artifact on your machine")
         subparser.add_argument("repo_id", help="id of target repository")
@@ -90,7 +91,7 @@ class ArtifactCLI(CLI):
                 return self.repository.upload_artifacts_to_staging([artifact], args.repo_id, True,
                                                                    upload_filelist=args.upload_filelist)
         else:
-            return self.repository.upload_artifacts([artifact], args.repo_id, True)
+            return self.repository.upload_artifacts([artifact], args.repo_id, use_direct_put=args.use_direct_put)
 
     def delete(self, args):
         self.repository.delete_artifact(args.url)

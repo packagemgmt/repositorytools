@@ -43,24 +43,28 @@ class ArtifactCliTest(TestCase):
         os.unlink(ARTIFACT_LOCAL_PATH)
 
     def test_upload_resolve_and_delete(self):
-        # upload
-        remote_artifacts = self.artifact_cli.run(['upload', ARTIFACT_LOCAL_PATH, config.REPO, GROUP])
-        self.assertEquals(len(remote_artifacts), 1)
-        remote_artifact = remote_artifacts[0]
+        for use_direct_put in [True, False]:
+            # upload
+            if not use_direct_put:
+                remote_artifacts = self.artifact_cli.run(['upload', ARTIFACT_LOCAL_PATH, config.REPO, GROUP])
+            else:
+                remote_artifacts = self.artifact_cli.run(['upload', '--use-direct-put', ARTIFACT_LOCAL_PATH, config.REPO, GROUP])
+            self.assertEquals(len(remote_artifacts), 1)
+            remote_artifact = remote_artifacts[0]
 
-        # resolve
-        del os.environ['REPOSITORY_USER'] # to test that resolving works even without authentication
-        urls = self.artifact_cli.run(['resolve', config.REPO, remote_artifact.get_coordinates_string()]).split('\n')
+            # resolve
+            del os.environ['REPOSITORY_USER'] # to test that resolving works even without authentication
+            urls = self.artifact_cli.run(['resolve', config.REPO, remote_artifact.get_coordinates_string()]).split('\n')
 
-        self.assertEqual(1, len(urls))
-        url = urls[0]
-        r = requests.get(url, auth=(config.USER, os.environ['REPOSITORY_PASSWORD']))
-        r.raise_for_status()
-        self.assertEqual(r.text, CONTENT)
+            self.assertEqual(1, len(urls))
+            url = urls[0]
+            r = requests.get(url, auth=(config.USER, os.environ['REPOSITORY_PASSWORD']))
+            r.raise_for_status()
+            self.assertEqual(r.text, CONTENT)
 
-        # delete
-        os.environ['REPOSITORY_USER'] = config.USER
-        self.artifact_cli.run(['delete', remote_artifact.url])
+            # delete
+            os.environ['REPOSITORY_USER'] = config.USER
+            self.artifact_cli.run(['delete', remote_artifact.url])
 
     def test_upload_explicit_version(self):
         # upload

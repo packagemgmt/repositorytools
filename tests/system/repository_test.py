@@ -42,7 +42,7 @@ class NexusProRepositoryClientTest(TestCase):
 
     def test_set_artifact_metadata(self):
         logger.debug('local artifact coords: %s', self.artifact_for_upload.get_coordinates_string())
-        remote_artifacts = self.repository.upload_artifacts([self.artifact_for_upload], self.repo, False)
+        remote_artifacts = self.repository.upload_artifacts([self.artifact_for_upload], self.repo, use_direct_put=False)
         self.assertEqual(len(remote_artifacts), 1)
         remote_artifact = remote_artifacts[0]
         logger.debug('coords %s', remote_artifact.get_coordinates_string())
