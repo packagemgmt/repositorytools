@@ -139,7 +139,7 @@ class NexusRepositoryClient(object):
                 }
 
 
-                data_list = data.items()
+                data_list = list(data.items())
                 data_list.append( ('file', (filename, f, 'text/plain') ))
                 m_for_logging = MultipartEncoder(fields=data_list)
                 logger.debug('payload: %s', m_for_logging.to_string())
