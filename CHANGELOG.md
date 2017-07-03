@@ -2,6 +2,9 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [4.2.2] - 2017-07-03
+- GH27: [py3, lib] upload: made REST upload work on Python 3.x. Thanks Lucas-C
+
 ## [4.2.1] - 2016-06-11
 - GH23: [cli] upload: allow user to switch between rest and plain old PUT
 - GH21: [cli, lib] upload: failing when using REST and specifying version explicitly
