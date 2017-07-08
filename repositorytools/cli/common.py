@@ -42,10 +42,16 @@ class CLI(collections.Callable):
                                  help="Print lots of debugging information")
         self.parser.add_argument("-Q", "--quiet", action="store_true", dest="quiet", default=False,
                                  help="Print less information")
+        self.parser.add_argument("-V", "--version", action="store_true", dest="display_version", default=False,
+                                 help="Prints version and exit")
         self.repository = None
 
     def run(self, args=None):
         args_namespace = self.parser.parse_args(args)
+        configure_logging(args_namespace.quiet, args_namespace.debug)
+        if args_namespace.display_version:
+            print('repositorytools v{}'.format(repositorytools.__version__))
+            self.parser.exit()
         configure_logging(args_namespace.quiet, args_namespace.debug)
         # in tests we don't use 'str(sys.argv), so we can log actual arguments
         used_args = args or sys.argv[1:]
