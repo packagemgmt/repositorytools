@@ -2,6 +2,9 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [4.2.3] - 2017-07-13
+- GH29: [cli] fixes command line interface
+
 ## [4.2.2] - 2017-07-03
 - GH27: [py3, lib] upload: made REST upload work on Python 3.x. Thanks Lucas-C
 
