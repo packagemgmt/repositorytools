@@ -11,14 +11,15 @@ import repositorytools
 logger = logging.getLogger(sys.argv[0])
 
 
-def configure_logging(debug):
+def configure_logging(quiet, debug):
+    logging.captureWarnings(True)
     if debug:
         logging.basicConfig(level=logging.DEBUG)
         http_client.HTTPConnection.debuglevel = 1
         requests_log = logging.getLogger("requests.packages.urllib3")
         requests_log.setLevel(logging.INFO)
         requests_log.propagate = True
-    else:
+    elif not quiet:
         logging.basicConfig(level=logging.INFO)
 
 
@@ -39,11 +40,13 @@ class CLI(collections.Callable):
         self.parser = self._get_parser()
         self.parser.add_argument("-D", "--debug", action="store_true", dest="debug", default=False,
                                  help="Print lots of debugging information")
+        self.parser.add_argument("-Q", "--quiet", action="store_true", dest="quiet", default=False,
+                                 help="Print less information")
         self.repository = None
 
     def run(self, args=None):
         args_namespace = self.parser.parse_args(args)
-        configure_logging(args_namespace.debug)
+        configure_logging(args_namespace.quiet, args_namespace.debug)
         # in tests we don't use 'str(sys.argv), so we can log actual arguments
         used_args = args or sys.argv[1:]
         logger.info('Started %s, with arguments %s', sys.argv[0], str(used_args))
