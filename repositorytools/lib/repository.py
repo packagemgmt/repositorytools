@@ -92,7 +92,7 @@ class NexusRepositoryClient(object):
         remote_artifact.classifier = data.get('classifier', remote_artifact.classifier)
         remote_artifact.extension = data.get('extension', remote_artifact.extension)
 
-        remote_artifact.url = '{repository_url}/content/repositories/{repo}/{artifact_path}'.format(
+        remote_artifact.url = '{repository_url}/content/repositories/{repo}{artifact_path}'.format(
             repository_url=self._repository_url, repo=remote_artifact.repo_id, artifact_path=data['repositoryPath'])
 
         remote_artifact.present_locally = data['presentLocally']
