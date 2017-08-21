@@ -86,8 +86,23 @@ class NexusRepositoryClient(object):
                                                                c=remote_artifact.classifier,
                                                                e=remote_artifact.extension))['data']
 
+        remote_artifact.group = data.get('groupId', remote_artifact.group)
+        remote_artifact.artifact = data.get('artifactId', remote_artifact.artifact)
+        remote_artifact.version = data.get('version', remote_artifact.version)
+        remote_artifact.classifier = data.get('classifier', remote_artifact.classifier)
+        remote_artifact.extension = data.get('extension', remote_artifact.extension)
+
         remote_artifact.url = '{repository_url}/content/repositories/{repo}/{artifact_path}'.format(
             repository_url=self._repository_url, repo=remote_artifact.repo_id, artifact_path=data['repositoryPath'])
+
+        remote_artifact.present_locally = data['presentLocally']
+        remote_artifact.snapshot = data['snapshot']
+        remote_artifact.snapshot_buildnumber = data['snapshotBuildNumber']
+        remote_artifact.snapshot_timestamp = data['snapshotTimeStamp']
+        if 'baseVersion' in data:
+            remote_artifact.base_version = data['baseVersion']
+        if 'sha1' in data:
+            remote_artifact.sha1 = data.get('sha1')
 
     def upload_artifacts(self, local_artifacts, repo_id, print_created_artifacts=True, _hostname_for_download=None,
                          _path_prefix='content/repositories', use_direct_put=False):
