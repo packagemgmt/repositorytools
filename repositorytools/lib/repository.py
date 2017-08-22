@@ -2,12 +2,15 @@
 Contains classes for manipulating with a repository server
 """
 
+from __future__ import print_function
+
 __all__ = ['RepositoryClientError', 'WrongDataTypeError', 'ArtifactNotFoundError',
            'NexusRepositoryClient', 'NexusProRepositoryClient', 'repository_client_factory']
 
 import requests
 import logging
 import os
+import sys
 import json
 import base64
 
@@ -208,7 +211,7 @@ class NexusRepositoryClient(object):
                 print("##teamcity[highlight title='{caption}' text='{text}']".format(caption=caption, text=text))
 
         else:
-            print(caption)
+            print(caption, file=sys.stderr)
 
             for remote_artifact in remote_artifacts:
                 print(remote_artifact.url)
