@@ -1,5 +1,5 @@
-.. image:: https://travis-ci.org/stardust85/repositorytools.svg?branch=master
-    :target: https://travis-ci.org/stardust85/repositorytools
+.. image:: https://travis-ci.org/packagemgmt/repositorytools.svg?branch=master
+    :target: https://travis-ci.org/packagemgmt/repositorytools
     :alt: CI Build
 
 .. image:: https://img.shields.io/gratipay/stardust85.svg
