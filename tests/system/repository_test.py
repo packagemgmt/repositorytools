@@ -26,7 +26,7 @@ class NexusProRepositoryClientTest(TestCase):
 
     def test_upload_artifacts_to_new_staging(self):
         artifacts = self.repository.upload_artifacts_to_new_staging(local_artifacts=[self.artifact_for_upload],
-                                                                    repo_id=self.repo, upload_filelist=True)
+                                                                    profile_name=self.repo, upload_filelist=True)
         repo_id = artifacts[0].repo_id
         logging.info('Uploaded to %s', repo_id)
 

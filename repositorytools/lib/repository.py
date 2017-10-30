@@ -299,20 +299,20 @@ class NexusProRepositoryClient(NexusRepositoryClient):
 
         return remote_artifacts
 
-    def upload_artifacts_to_new_staging(self, local_artifacts, repo_id, print_created_artifacts=True,
+    def upload_artifacts_to_new_staging(self, local_artifacts, profile_name, print_created_artifacts=True,
                                         description='No description', upload_filelist=False):
         """
         Creates a staging repository in staging profile with name repo_id and uploads local_artifacts there.
 
         :param local_artifacts: list[LocalArtifact]
-        :param repo_id: name of target repository
+        :param profile_name: name of staging profile
         :param print_created_artifacts: if True prints to stdout what was uploaded and where
         :param description: description of staging repo
         :param upload_filelist: see upload_artifacts_to_staging
 
         :return: list[RemoteArtifact]
         """
-        repo_id = self.create_staging_repo(repo_id, description)
+        repo_id = self.create_staging_repo(profile_name, description)
         remote_artifacts = self.upload_artifacts_to_staging(local_artifacts, repo_id, print_created_artifacts, upload_filelist)
 
         # close staging repo

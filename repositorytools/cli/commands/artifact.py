@@ -33,7 +33,7 @@ class ArtifactCLI(CLI):
         subparser.add_argument("--use-direct-put", action="store_true", help="don't use REST API, but directly put the file to it's probable path. Doesn't generate maven metadata. Good for uploading to snapshot repositories.")
 
         subparser.add_argument("local_file", help="path to an artifact on your machine")
-        subparser.add_argument("repo_id", help="id of target repository")
+        subparser.add_argument("repo_id_or_profile_name", help="id of target repository (normal repo) or profile name (staging repo - option -s)")
         subparser.add_argument("group", help="artifact group")
         subparser.set_defaults(func=self.upload)
 
@@ -84,14 +84,14 @@ class ArtifactCLI(CLI):
 
         if args.staging:
             if not args.use_existing:
-                return self.repository.upload_artifacts_to_new_staging([artifact], args.repo_id, True,
+                return self.repository.upload_artifacts_to_new_staging([artifact], args.repo_id_or_profile_name, True,
                                                                        description=args.description,
                                                                        upload_filelist=args.upload_filelist)
             else:
-                return self.repository.upload_artifacts_to_staging([artifact], args.repo_id, True,
+                return self.repository.upload_artifacts_to_staging([artifact], args.repo_id_or_profile_name, True,
                                                                    upload_filelist=args.upload_filelist)
         else:
-            return self.repository.upload_artifacts([artifact], args.repo_id, use_direct_put=args.use_direct_put)
+            return self.repository.upload_artifacts([artifact], args.repo_id_or_profile_name, use_direct_put=args.use_direct_put)
 
     def delete(self, args):
         self.repository.delete_artifact(args.url)
