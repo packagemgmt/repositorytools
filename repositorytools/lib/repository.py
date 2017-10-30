@@ -305,7 +305,7 @@ class NexusProRepositoryClient(NexusRepositoryClient):
         Creates a staging repository in staging profile with name repo_id and uploads local_artifacts there.
 
         :param local_artifacts: list[LocalArtifact]
-        :param profile_name: name staging profile
+        :param profile_name: name of staging profile
         :param print_created_artifacts: if True prints to stdout what was uploaded and where
         :param description: description of staging repo
         :param upload_filelist: see upload_artifacts_to_staging
