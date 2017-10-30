@@ -11,7 +11,7 @@ echo "Provisioning"
 cd /vagrant
 
 sudo yum-builddep -y *.spec
-sudo yum -y install git rpm-build mock rpmdevtools python-tox
+sudo yum -y install git rpm-build mock rpmdevtools python-tox python-virtualenv
 sudo usermod -a -G mock vagrant
 
 echo "export VENV_HOME=/home/vagrant/" >> /etc/bashrc
