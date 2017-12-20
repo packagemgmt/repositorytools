@@ -1,8 +1,6 @@
 # needed by tests
 nose  # going to deprecate it
 coverage # going to deprecate it with nose
-pytest == 3.2.5
-pytest-cov
 mock
 Sphinx
 teamcity-messages
