@@ -153,6 +153,7 @@ class NexusRepositoryClient(object):
                     'r':repo_id,
                     'e': local_artifact.extension,
                     'p': local_artifact.extension,
+                    'c': local_artifact.classifier,
                     'hasPom': 'false'
                 }
 
