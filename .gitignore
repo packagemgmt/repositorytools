@@ -53,3 +53,9 @@ docs/_build/
 
 # PyBuilder
 target/
+
+# IDE files and folders
+.idea/
+
+# Vagrant files and folders
+.vagrant/
