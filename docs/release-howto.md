@@ -11,3 +11,20 @@
    ```
    make release
    ```
+
+example of ~/.pypirc:
+```
+[distutils] # this tells distutils what package indexes you can push to
+index-servers =
+    pypi
+    pypitest
+
+[pypi]
+username: packagemgmt
+password: *****************
+
+[pypitest]
+repository: https://test.pypi.org/legacy/
+username: packagemgmt
+password: ******************
+```

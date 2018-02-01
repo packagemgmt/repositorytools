@@ -12,9 +12,11 @@ testrelease:
 	git push
 	git tag $(VERSION)
 	git push --tags
-	python setup.py sdist upload -r pypitest
+	python setup.py sdist
+	python setup.py bdist_wheel --universal
+	twine upload -r pypitest
 release:
-	python setup.py sdist upload -r pypi
+	twine upload -r pypi
 
 unittests:
 	. $(VENV_HOME)/testenv/bin/activate && nosetests $(NOSEOPTIONS) tests/unit && deactivate
