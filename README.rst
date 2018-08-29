@@ -120,6 +120,6 @@ is on http://repositorytools.readthedocs.org/en/latest/
 Support
 -------
 You can support my effort many ways:
- * create issues
- * fix issues (by sending pull requests)
- * donating on https://gratipay.com/~stardust85/, you can send even 1 cent per month ;) (but the more the better)
+ * By creating issues
+ * By fixing issues (=sending pull requests)
+ * donating at https://liberapay.com/stardust85/, you can send even 1 cent per week ;)
